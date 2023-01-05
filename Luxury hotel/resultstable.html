@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable -->
+<html class="  ext-strict"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Formsite - Results Table</title>
+	<link rel="stylesheet" href="./resultstable_files/jquery-ui.min.css">
+	<link rel="stylesheet" href="./resultstable_files/internal2.css">
+	<script type="text/javascript" async="" src="./resultstable_files/ecommerce.js.download"></script><script type="text/javascript" async="" src="./resultstable_files/js"></script><script type="text/javascript" async="" src="./resultstable_files/bat.js.download"></script><script type="text/javascript" async="" src="./resultstable_files/analytics.js.download"></script><script type="text/javascript" async="" src="./resultstable_files/mixpanel-2-latest.min.js.download"></script><script async="" src="./resultstable_files/gtm.js.download"></script><script src="./resultstable_files/jquery.min.js.download"></script>
+	<script src="./resultstable_files/jquery-ui.min.js.download"></script>
+	<script src="./resultstable_files/internal2.js.download"></script>
+	
+	
+<link rel="stylesheet" href="./resultstable_files/ext-custom.css">
+<link rel="stylesheet" href="./resultstable_files/summary2.css">
+<script src="./resultstable_files/ext-custom.js.download"></script>
+<script src="./resultstable_files/summary2.js.download"></script>
+
+
+
+<style>
+	.x-status-icon-0 { background-image:url(/images/layout/internal2/icons/status-na.svg) !important; }.x-status-icon-1 { background-image:url(/images/layout/internal2/icons/status-incomplete.svg) !important; }.x-status-icon-2 { background-image:url(/images/layout/internal2/icons/status-complete.svg) !important; }.x-status-icon-3 { background-image:url(/images/layout/internal2/icons/status-uploaded.svg) !important; }.x-status-icon-4 { background-image:url(/images/layout/internal2/icons/status-failed.svg) !important; }
+</style>
+
+<script>
+	var checkboxes;
+	
+	Vromansys.getParameters = function(name,value) {
+		var storeOptions = store.lastOptions.params;
+		var params = '';
+		if(name) {
+			params += '&' + name + '=' + value;
+		}
+		for (var property in storeOptions) {
+			if (!(storeOptions[property] instanceof Function) && property != name) {
+				params += '&' + property + '=' + storeOptions[property];
+			}
+		}
+		return params;
+	};
+	
+	Vromansys.sendEmail = function(btn, text) {
+		if($("#NotificationNbr").val() == "" && $("#EmailFormat").val() == "15") {
+			if($("#ResultsDoc").val() == "1") {
+				if(true) {
+					Formsite.Util.Dialog.alert("Upgrade Required", "The Results Docs feature with a built-in Results Doc requires a Pro 2 level account or higher. <a href=\"/bld/FormSite?FormId=LoadUpgradeRenew\">Upgrade now</a>.");
+					$("#dialog-email").dialog("close");
+					return;
+				}
+			} else if(true) {
+				Formsite.Util.Dialog.alert("Upgrade Required", "The Results Docs feature with a custom Results Doc requires the Results Docs add-on. <a href=\"/bld/FormSite?FormId=LoadBillingAddOns\">Upgrade now</a>.");
+				$("#dialog-email").dialog("close");
+				return;
+			}
+		}
+		
+		if($("#NotificationNbr").find(":selected").data("format") == "15") {
+			if(true) {
+				Formsite.Util.Dialog.alert("Upgrade Required", "The Results Docs feature requires a Pro 2 level account or higher to use built-in Results Docs and the Results Docs add-on to use custom Results Docs. <a href=\"/bld/FormSite?FormId=LoadBillingAddOns\">Upgrade now</a>.");
+				$("#dialog-email").dialog("close");
+				return;
+			}
+		}
+			
+		$('#dialog-sending').dialog('open');
+		Ext.Ajax.request({
+			url : 'https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjEG95Tr93K5hkq9tpIVJVRQHojm7q9HFQmD-xvzuSFI3',
+			params : { 	
+				ResultNbr: document.getElementById('ResultNbr').value,
+				NotificationNbr: document.getElementById('NotificationNbr').value,
+				ResultEmailAddress: document.getElementById('ResultEmailAddress').value,
+				EmailFormat: document.getElementById('EmailFormat').value,
+				View: document.getElementById('EmailView').value,
+				ResultsDoc: document.getElementById('ResultsDoc').value,
+				CustomLabel: '',
+				Message: document.getElementById('Message').value
+			},
+			method: 'GET',
+			success: function ( result, request ) {
+				$('#dialog-sending').dialog('close');
+				
+				var val = document.getElementById('ResultEmailAddress').value;
+				val = val.replace(";", ",");
+				if ((val.match(/,/g)||[]).length > 9) {
+					// failed  mail dialog
+					Formsite.Util.Dialog.alert("Sorry!", "Cannot send to more than ten addresses at a time.");
+				} else {
+					// sent mail dialog
+					Formsite.Util.Dialog.alert("Email Sent", "Email sent to " + document.getElementById('ResultEmailAddress').value);
+				}
+			},
+			failure: function ( result, request) {
+				$('#dialog-sending').dialog('close');
+
+				// failed mail dialog
+				Formsite.Util.Dialog.alert("Error", "Email not sent.");
+			} 
+		});
+	
+		$("#dialog-email").dialog("close");
+	};
+	
+	Vromansys.changeEmailFormat = function() {
+		if(document.getElementById('EmailFormat')) {
+			if(document.getElementById('EmailFormat').value == '15') {
+				document.getElementById('doc-select').style.display='';
+			} else {
+				document.getElementById('doc-select').style.display='none';
+			}
+		}
+	};
+	
+	Vromansys.changeEmailNotification = function() {
+		if(document.getElementById('NotificationNbr')) {
+			if(document.getElementById('NotificationNbr').value == '') {
+				document.getElementById('email-custom-settings').style.display='';
+			} else {
+				document.getElementById('email-custom-settings').style.display='none';
+			}
+			$("#dialog-email").parent().css("top", ( $(window).height() - 180 - $("#dialog-email").height() ) / 2  + "px");
+		}
+	};
+	
+	var sSubUserError="You do not have permission to access this page for this form. This page requires read, write permission.";
+	
+	Vromansys.doDeleteAttachment = function() {
+		$("#dialog-delete-file").dialog('close');
+		
+		Ext.Ajax.request({
+			url: 'https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjIQ6ldFzx2wzQfkkO3SLBj5ALqXqptsm3gZqVTaGd3ZuFzpUCZwnDno',
+			params: {
+				ResultNbr: $("#ResultNbr").val(),
+				ItemNbr: $("#ItemNbr").val(),
+				SubNbr: $("#SubNbr").val()
+			},
+			method: 'GET',
+			success: function ( result, request ) {
+				if(result.responseText.indexOf(sSubUserError) != -1){
+					$("#dialog-permissions").dialog('open');
+				} else{
+					store.reload();
+				}
+			},
+			failure: function ( result, request) { 
+				// do nothing
+			} 
+		});
+	};
+	
+	Vromansys.doDeleteResults = function(btn, text){
+		$('#dialog-delete').dialog('close');
+		
+		var selected = grid.getSelectionModel().getSelections();
+		var selectedResults = "";
+		for(var i = 0; i < selected.length; i++) {
+			if(selectedResults.length > 0) { 
+				selectedResults += "^";
+			}
+			selectedResults += selected[i].id;
+		}
+		
+		Ext.Ajax.request({
+			url : 'https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjFnupEiWy0b4gh94OeLoYlLNWJ_vKeVgxQBjHs59ELu2ieOqHT6LNxPqLkXZZ2-T3Q',
+			params : {
+				DeleteResults : selectedResults
+			},
+			method: 'GET',
+			success: function ( result, request ) {
+				if(result.responseText.indexOf(sSubUserError) != -1){
+					$("#dialog-permissions").dialog('open');
+				} else{
+					store.reload();
+				}
+			},
+			failure: function ( result, request) { 
+				// do nothing
+			} 
+		});
+	};
+
+	Vromansys.getNumItems = function(bOnlyChecked) { 
+		var checked = Ext.DomQuery.select("input[type=checkbox]" + (bOnlyChecked ? ":checked" : ""), "item-selector");
+		return checked.length; 
+	};
+
+	Vromansys.getCheckboxItems = function(bOnlyChecked) { 
+		var checked = Ext.DomQuery.select("input[type=checkbox]" + (bOnlyChecked ? ":checked" : ""), "item-selector");
+		return checked;
+	};
+	
+	Vromansys.doUpdateResultsView = function(btn, text){
+		if(Vromansys.getNumItems(true) > 0) {
+			Ext.Ajax.request({
+				url : 'https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjFnupEiWy0b4gh94OeLoYlLGLooY-FIx8EEWRdQ14cXbmWLGW1DoPKwgxO1CixCGfYszisCy2psl' + Vromansys.getParameters(null,null),
+				form: 'item-selector-form',
+				method: 'GET',
+				success: function ( result, request ) {
+					window.location.href = 'https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-A2VTJ8KiEg-jkCGHAK7awPAZqVTaGd3ZuFzpUCZwnDno' + Vromansys.getParameters('fs_view','13');
+				},
+				failure: function ( result, request) { 
+					// do nothing
+				} 
+			});
+		}
+	};
+	
+	Vromansys.changeReloadSetting = function(name,value){
+		// reload page with new setting
+		Vromansys.reloadPage(Vromansys.getParameters(name,value));
+	};
+	
+	Vromansys.reloadPage = function(params){
+		// reload page with new setting
+		window.location.href = 'https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-A2VTJ8KiEg-jkCGHAK7awPAZqVTaGd3ZuFzpUCZwnDno' + params;
+	};
+	
+	Vromansys.showDeleteResultsDialog = function() {
+		$('#dialog-delete').dialog('open');
+	};
+	
+	Vromansys.showEmailResultDialog = function(resultId) {
+		document.getElementById('ResultNbr').value = resultId;
+		$('#dialog-email').dialog('open');
+		Vromansys.changeEmailNotification();
+		Vromansys.changeEmailFormat();
+	};
+	
+	Vromansys.showDeleteAttachmentDialog = function(resultId, itemNbr, subNbr) {
+		$("#ResultNbr").val(resultId);
+		$("#ItemNbr").val(itemNbr);
+		$("#SubNbr").val(subNbr);
+		$("#dialog-delete-file").dialog('open');
+	};
+	
+	Vromansys.renderRowControls = function(value, metaData, record, rowIndex, colIndex, store) {
+		var resultId = record.id;
+		var html = "";
+		html += "<a href='#' alt='view' class='active-control view' onclick='Formsite.Util.popWin(\"https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjErEOui3e7vm0PnWeMbbFK1CY67ydgkv74njqh0-izcTnl7GwFhoSS0rcZwiPvhs5jRHHBpgITyDm_KYCitsnLsgOH43FXYaXg&View=11&ResultNbr="+resultId+"\"); trackEvent(\"Results_ResultsTable_View\"); return false' title='View this result'></a>";
+		html += "|<a href='#' alt='edit' class='active-control edit' onclick='Formsite.Util.popWin(\"https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-AzE0KLDYI_3FQgJdx4l1HgL-eqCb33dv03xpMRwBv07MXFdCNqJ_QZA&ResultNbr="+resultId+"\"); trackEvent(\"Results_ResultsTable_Edit\"); return false' title='Edit this result'></a>";
+		html += "|<a href='#' alt='email' class='active-control email' onclick='Vromansys.showEmailResultDialog(\""+resultId+"\"); trackEvent(\"Results_ResultsTable_Email\"); return false' title='Email this result'></a>";
+		return html;
+	};
+	
+	Vromansys.renderRowDate = function(value, metaData, record, rowIndex, colIndex, store) {
+		var html = "";
+		if(value != null && value.length > 0) {
+			var dates = value.split('^');
+			html += "<span id=\"";
+			html += dates[0] + "-" + colIndex;
+			html += "\" onmouseover=\"Vromansys.InfoPanel.show('";
+			html += dates[0] + "-" + colIndex;
+			html += "');Vromansys.InfoPanel.setText('<strong>Last Update:</strong> ";
+			html += dates[1];
+			html += "<br><strong>Start Time:</strong> ";
+			html += dates[2];
+			html += "<br><strong>Finish Time:</strong> ";
+			html += dates[3];
+			html += "<br><strong>Duration:</strong> ";
+			html += dates[4];
+			html += "');\" onmouseout=\"Vromansys.InfoPanel.hide();\">";
+			html += dates[1];
+			html += "</span>";
+		}
+		return html;
+	};
+	
+	Vromansys.renderRowUser = function(value, metaData, record, rowIndex, colIndex, store) {
+		var html = "";
+		if(value != null && value.length > 0) {
+			var user = value.split('^');
+			html += "<span id=\"";
+			html += user[0] + "-" + colIndex;
+			html += "\" onmouseover=\"Vromansys.InfoPanel.show('";
+			html += user[0] + "-" + colIndex;
+			html += "');Vromansys.InfoPanel.setText('<strong>IP:</strong> ";
+			html += user[1];
+			html += "<br><strong>Browser:</strong> ";
+			html += user[2];
+			html += "<br><strong>Device:</strong> ";
+			html += user[3];
+			html += "<br><strong>Referrer:</strong> ";
+			html += user[4];
+			html += "');\" onmouseout=\"Vromansys.InfoPanel.hide();\">";
+			html += user[1];
+			html += "</span>";
+		}
+		return html;
+	};
+	
+	Vromansys.renderShowHideColumn = function(value, metaData, record, rowIndex, colIndex, store) {
+		return "<div class=\"col-showhide\" onclick=\"$(\"#dialog-columns\").dialog('open');\">...</div>";
+	};
+
+	Vromansys.renderStatus = function(value, metaData, record, rowIndex, colIndex, store) {
+		if(value=='0') { return "<img src='/images/layout/internal2/icons/status-na.svg' alt='N/A' title='N/A' class='active-control' />"; } else if(value=='1') { return "<img src='/images/layout/internal2/icons/status-incomplete.svg' alt='Unconfirmed' title='Unconfirmed' class='active-control' />"; } else if(value=='2') { return "<img src='/images/layout/internal2/icons/status-complete.svg' alt='Confirmed' title='Confirmed' class='active-control' />"; } else if(value=='3') { return "<img src='/images/layout/internal2/icons/status-uploaded.svg' alt='Uploaded' title='Uploaded' class='active-control' />"; } else if(value=='4') { return "<img src='/images/layout/internal2/icons/status-failed.svg' alt='Failed' title='Failed' class='active-control' />"; }
+	};
+	
+	Vromansys.doSearch = function() {
+		var searchText = document.getElementById('Search').value;
+		if(searchText != null && searchText.length > 0) {
+			store.setBaseParam('fs_filter',-1);
+			store.setBaseParam('fs_page',0);
+			store.setBaseParam('search',searchText);
+			store.setBaseParam('start',0);
+			var storeOptions = store.lastOptions.params;
+			storeOptions.search = searchText;
+			storeOptions.fs_page = 0;
+			storeOptions.fs_filter = -1;
+			storeOptions.start = 0;
+			store.load({method: 'GET',params:storeOptions});
+			
+			// update filter selector
+			$("#Filter option[value='search']").remove();
+			$('#Filter').append($('<option></option>').val("search").html("Search - " + searchText));
+			$('#Filter').val("search");
+		} else {
+			$("#Search").val(" ");
+			setTimeout(function(){
+				$("#Search").focus();
+				$("#Search").val("");
+			}, 300);
+		}
+	};
+	
+	Vromansys.itemSelectorCheckAll = function(bCheck) {
+		Ext.each(Vromansys.getCheckboxItems(false), function(item) {
+			item.checked = bCheck;
+		}, this);
+	};
+
+	function doView() {
+		var selector = $('#DefaultView')[0];
+		var value = selector.options[selector.selectedIndex].value;
+		
+		if(value != store.lastOptions.params.fs_view) {
+			store.setBaseParam('fs_view',value);
+			Vromansys.changeReloadSetting('fs_view',value);
+		}
+	}
+	
+	function doFilter() {
+		var selector = $('#Filter')[0];
+		var value = selector.options[selector.selectedIndex].value;
+		
+		if(value != store.lastOptions.params.fs_filter) {
+			store.setBaseParam('fs_filter',value);
+			store.setBaseParam('fs_page',0);
+			store.setBaseParam('start',0);
+			store.setBaseParam('search','');
+			var storeOptions = store.lastOptions.params;
+			storeOptions.fs_filter = value;
+			storeOptions.fs_page = 0;
+			storeOptions.start = 0;
+			storeOptions.search = '';
+			store.load({method: 'GET',params:storeOptions});
+			
+			$("#Search").val("");
+			$("#Filter option[value='search']").remove();
+		}
+	}
+	
+	function doLabel() {
+		var selector = $('#CustomLabel')[0];
+		var value = selector.options[selector.selectedIndex].value;
+		
+		if(value != store.lastOptions.params.fs_custom_labels) {
+			store.setBaseParam('fs_custom_labels',value);
+			Vromansys.changeReloadSetting('fs_custom_labels',value);
+		}
+	}
+	
+	$(function() {
+		if(document.cookie.indexOf("toggleLeft=false") > -1) {
+			Formsite.Util.Layout.toggleLeft();
+		}
+		
+		checkboxes = new Ext.grid.CheckboxSelectionModel({
+			checkOnly:true,
+			listeners: {
+				selectionchange: function(sm) {
+					if (sm.getCount()) {
+						grid.deleteButton.enable();
+					} else {
+						grid.deleteButton.disable();
+					}
+				}
+			}
+		});
+
+		
+		var dataFields = [{name: 'REF_NUM', mapping: 'metas.id'}
+,{name: 'STATUS', mapping: 'metas.result_status'}
+,{name: 'ORDER_AMOUNT', mapping: 'metas.order_amount'}
+,{name: 'PAYPAL', mapping: 'metas.payment_status'}
+,{name: 'DATE', mapping: 'metas.date_update'}
+,{name: 'USER', mapping: 'metas.user_ip'}
+,{name: '2', mapping: 'items[0].value'}
+,{name: '3', mapping: 'items[1].value'}
+,{name: '5', mapping: 'items[2].value'}
+,{name: '6', mapping: 'items[3].value'}
+,{name: '9', mapping: 'items[4].value'}
+,{name: '10', mapping: 'items[5].value'}
+,{name: '13', mapping: 'items[6].value'}
+,{name: '14', mapping: 'items[7].value'}
+,{name: '15', mapping: 'items[8].value'}
+,{name: '38', mapping: 'items[9].value'}
+,{name: '40-0', mapping: 'items[10].values[0].value'}
+,{name: '19', mapping: 'items[11].value'}
+];
+		var gridColumns = [checkboxes, {header: '', id:'controls', dataIndex:'controls', width:100, sortable:false, fixed:true, menuDisabled:true, renderer: Vromansys.renderRowControls }
+,{header: 'Reference #', width: 115, dataIndex: 'REF_NUM', sortable: true}
+,{header: 'Status', width: 70, dataIndex: 'STATUS', align: 'center', sortable: true, editor: new Ext.grid.GridEditor(new Ext.ux.IconCombo({ forceSelection: true, lazyRender: true, store: new Ext.data.SimpleStore({ fields: ['statusCode', 'statusName', 'statusIcon'], data: [ ['0', 'N/A', 'x-status-icon-0'], ['1', 'Unconfirmed', 'x-status-icon-1'], ['2', 'Confirmed', 'x-status-icon-2'], ['3', 'Uploaded', 'x-status-icon-3'], ['4', 'Failed', 'x-status-icon-4']] }), valueField: 'statusCode', displayField: 'statusName', iconClsField: 'statusIcon', triggerAction: 'all', mode: 'local', minListWidth: 104, editable: false }), { listeners: { startedit: function(){ this.field.expand(); } } }), renderer: Vromansys.renderStatus, css: 'cursor: pointer;' }
+,{header: 'Amount', width: 80, dataIndex: 'ORDER_AMOUNT', align: 'right', sortable: false, menuDisabled: true}
+,{header: 'Payment', width: 120, dataIndex: 'PAYPAL', sortable: true}
+,{header: "First Name", width: 150, dataIndex: '2', sortable: true}
+,{header: "Last Name", width: 150, dataIndex: '3', sortable: true}
+,{header: "Address", width: 150, dataIndex: '5', sortable: true}
+,{header: "City", width: 150, dataIndex: '6', sortable: true}
+,{header: "Phone Number", width: 150, dataIndex: '9', sortable: true}
+,{header: "Email Address", width: 150, dataIndex: '10', sortable: true}
+,{header: "First Day:", width: 150, dataIndex: '13', sortable: true}
+,{header: "Number of Nights", width: 150, dataIndex: '14', sortable: true}
+,{header: "Suite Type (All prices per night)", width: 150, dataIndex: '15', sortable: true}
+,{header: "Number of adults", width: 150, dataIndex: '38', sortable: true}
+,{header: ". (Number of children)", width: 150, dataIndex: '40-0', sortable: false, menuDisabled: true}
+,{header: "Optional Instructions/Questions", width: 150, dataIndex: '19', sortable: true}
+,{header: 'Date', width: 145, dataIndex: 'DATE', sortable: true, renderer: Vromansys.renderRowDate}
+,{header: 'User', width: 125, dataIndex: 'USER', sortable: true, renderer: Vromansys.renderRowUser}
+];
+		var storeParams = {fs_page:'0',fs_limit:'50',fs_view:'13',fs_filter:'',fs_custom_labels:'',search:''};
+		
+		loadGrid('results-grid-812360-0','https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjBGBGOMHOLiGEHoOlYR-FzXZ7sHa36Zq3gLTZ5HBP858', dataFields, storeParams, 'o%3Acolumns%3Da%253Ao%25253Aid%25253Ds%2525253Achecker%25255Ewidth%25253Dn%2525253A20%255Eo%25253Aid%25253Ds%2525253Acontrols%25255Ewidth%25253Dn%2525253A100%255Eo%25253Aid%25253Dn%2525253A2%25255Ewidth%25253Dn%2525253A115%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A3%25255Ewidth%25253Dn%2525253A128%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A4%25255Ewidth%25253Dn%2525253A113%255Eo%25253Aid%25253Dn%2525253A5%25255Ewidth%25253Dn%2525253A137%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A6%25255Ewidth%25253Dn%2525253A100%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A7%25255Ewidth%25253Dn%2525253A90%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A8%25255Ewidth%25253Dn%2525253A66%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A9%25255Ewidth%25253Dn%2525253A79%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A10%25255Ewidth%25253Dn%2525253A95%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A11%25255Ewidth%25253Dn%2525253A99%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A12%25255Ewidth%25253Dn%2525253A150%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A13%25255Ewidth%25253Dn%2525253A150%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A14%25255Ewidth%25253Dn%2525253A150%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A15%25255Ewidth%25253Dn%2525253A150%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A16%25255Ewidth%25253Dn%2525253A150%255Eo%25253Aid%25253Dn%2525253A17%25255Ewidth%25253Dn%2525253A150%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A18%25255Ewidth%25253Dn%2525253A145%25255Esortable%25253Db%2525253A1%255Eo%25253Aid%25253Dn%2525253A19%25255Ewidth%25253Dn%2525253A125%25255Esortable%25253Db%2525253A1%5Esort%3Do%253Afield%253Ds%25253A2%255Edirection%253Ds%25253ADESC');
+		renderGrid('results-grid-812360-0', gridColumns, checkboxes);	
+		Vromansys.InfoPanel.init();
+		
+		
+		// email dialog
+		
+		$("#dialog-email").dialog({
+			buttons: [{
+				text: "Close",
+				click: function() {
+					$(this).dialog("close");
+				},
+				class: "button-secondary"
+			}]
+		});
+		
+		
+		// delete results dialog
+		$("#dialog-delete").dialog({
+			dialogClass: "dialog-danger",
+			buttons: [
+			{
+				text: "Yes, delete it",
+				click: function() {
+					Vromansys.doDeleteResults();
+					$(this).dialog("close");
+				},
+				class: "button-delete"
+			},
+			{
+				text: "No, keep it",
+				click: function() {
+					$(this).dialog("close");
+				},
+				class: "button-cancel"
+			}
+			]
+		});
+		
+		// delete attachment dialog
+		$("#dialog-delete-file").dialog({
+			dialogClass: "dialog-danger",
+			buttons: [
+			{
+				text: "Yes, delete it",
+				click: function() {
+					Vromansys.doDeleteAttachment();
+					$(this).dialog("close");
+				},
+				class: "button-delete"
+			},
+			{
+				text: "No, keep it",
+				click: function() {
+					$(this).dialog("close");
+				},
+				class: "button-cancel"
+			}
+			]
+		});
+		
+		// show/hide cols dialog
+		$("#dialog-columns").dialog({
+			buttons: [
+			{
+				text: "Save",
+				click: function() {
+					Vromansys.doUpdateResultsView();
+					$(this).dialog("close");
+				},
+				class: "button-primary"
+			},
+			{
+				text: "Cancel",
+				click: function() {
+					$(this).dialog("close");
+				},
+				class: "button-cancel"
+			}
+			]
+		});
+		
+		// sending mail dialog
+		$("#dialog-sending").dialog({
+			buttons: [{
+				text: "Close",
+				click: function() {
+					$(this).dialog("close");
+				},
+				class: "button-secondary"
+			}]
+		});
+		
+		// No permission for Subuser dialogue message 
+		$("#dialog-permissions").dialog({
+			buttons: [{
+				text: "Close",
+				click: function() {
+					$(this).dialog("close");
+				},
+				class: "button-secondary"
+			}]
+		});
+		
+		$("#Search").on("keypress",function (evn) {
+			if (evn.which == 13) {
+				evn.preventDefault();
+				Vromansys.doSearch();
+			}
+		});
+	});
+</script>
+
+	
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		
+		userData = {'email': 'ephantusmurigi1@gmail.com', 'newUser': 'true', 'userId': '812360' };
+		dataLayer.push(userData);
+	</script>
+	<!-- Google Tag Manager -->
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-W89G7S');</script>
+	<!-- End Google Tag Manager -->
+	
+	
+<meta http-equiv="origin-trial" content="A751Xsk4ZW3DVQ8WZng2Dk5s3YzAyqncTzgv+VaE6wavgTY0QHkDvUTET1o7HanhuJO8lgv1Vvc88Ij78W1FIAAAAAB7eyJvcmlnaW4iOiJodHRwczovL3d3dy5nb29nbGV0YWdtYW5hZ2VyLmNvbTo0NDMiLCJmZWF0dXJlIjoiUHJpdmFjeVNhbmRib3hBZHNBUElzIiwiZXhwaXJ5IjoxNjgwNjUyNzk5LCJpc1RoaXJkUGFydHkiOnRydWV9"><script type="text/javascript" async="" src="./resultstable_files/f.txt"></script><meta http-equiv="origin-trial" content="A751Xsk4ZW3DVQ8WZng2Dk5s3YzAyqncTzgv+VaE6wavgTY0QHkDvUTET1o7HanhuJO8lgv1Vvc88Ij78W1FIAAAAAB7eyJvcmlnaW4iOiJodHRwczovL3d3dy5nb29nbGV0YWdtYW5hZ2VyLmNvbTo0NDMiLCJmZWF0dXJlIjoiUHJpdmFjeVNhbmRib3hBZHNBUElzIiwiZXhwaXJ5IjoxNjgwNjUyNzk5LCJpc1RoaXJkUGFydHkiOnRydWV9"><script type="text/javascript" async="" src="./resultstable_files/f(1).txt"></script><script type="text/javascript" async="" src="./resultstable_files/f(2).txt"></script><script src="./resultstable_files/5438121.js.download" type="text/javascript" async="" data-ueto="ueto_8734adf599"></script></head>
+
+<body class="template-normal   ext-webkit ext-chrome" id="ext-gen9"><div id="ext-gen59" style="font-size: 13px; position: absolute; z-index: 1000; height: 75px; width: 250px; overflow: auto; background-color: rgb(232, 249, 238); padding: 4px; border: 1px solid rgb(215, 215, 215); visibility: hidden;"></div>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W89G7S" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+	<div id="wrapper">
+		<!-- BEGIN TOP -->
+		<div id="wrapper-top">
+			<nav id="menu-top-1">
+				<h1><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadHome" style="background-image:url(/images/layout/internal2/logo-internal.svg?9555951325399)">Luxury Hotel Reservation</a></h1>
+				<ul class="menu-main">
+					<li><a class="link-home" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadHome">My Forms</a></li>
+					<li><a class="link-support" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadSupport">Support</a></li>
+					<li><a id="menu-user-trigger" class="link-user"><span class="trigger">ephantusmurigi1@gmail.com</span></a></li>
+				</ul>
+				<ul class="menu-pop" id="menu-user">
+					<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadUserProfile">Profile</a></li>
+					
+					<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadBilling">Billing</a></li>
+					
+					<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadLog">Log</a></li>
+					<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadFilesImages">Files &amp; Images</a></li>
+					<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadUserList">Sub-users</a></li>
+					<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadDataRetention">Data Retention</a></li>
+					<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsSearch">Results Search</a></li>
+					<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadSummaryExport">Summary Export</a></li>
+					<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadWorkflowList">Workflows</a></li>
+					<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadLogout" onclick="trackEvent(&#39;Logout&#39;);">Log Out</a></li>
+				</ul>
+			</nav>
+			<nav id="menu-top-2">
+				
+					<h1 id="menu-forms-trigger"><span>Reservation</span></h1>
+					<ul class="menu-main">
+						<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadEdit">Form Editor</a></li>
+						<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadConfigure">Form Settings</a></li>
+						<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadShareLinks">Share</a></li>
+						<li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable" class="active">Results</a></li>
+					</ul>
+					
+					<button class="button-secondary" onclick="window.open(&#39;https://fs8.formsite.com/SzJBCG/rlg6svbegd/index.html&#39;);trackEvent(&#39;View_Form_Top&#39;);">View Form</button>
+					
+				
+			</nav>
+			<div class="menu-pop" id="menu-forms">
+				<div id="menu-forms-search">
+					<input type="text" value="">
+				</div>
+				<div id="menu-forms-forms">
+					<ul><li class="active"><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable&amp;FormNbr=0">Reservation</a></li><li><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable&amp;FormNbr=1">Order</a></li></ul>
+
+				</div>
+			</div>
+		</div>
+		<!-- END TOP -->
+
+		<form method="post" action="https://fs8.formsite.com/bld/FormSite" id="form-settings">
+		
+		<!-- BEGIN LEFT -->
+		<div id="wrapper-left">
+			<header>
+				<h2>Results</h2>
+				
+					<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" id="toggler-left" onclick="Formsite.Util.Layout.toggleLeft(); return false" style="position:absolute; top:16px; left: 287px"><img src="./resultstable_files/column-collapse.svg" alt="◄"></a>
+				
+			</header>
+			
+				<ul id="menu-left">
+					
+					
+					
+					
+						<li class="active">
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable">Results Table</a>
+							
+								
+							
+						</li>
+						<li class="more">
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadStatistics">Analytics</a>
+							
+						</li>
+						<li>
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsFilterList">Results Filters </a>
+						</li>
+						<li>
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsViewList">Results Views </a>
+						</li>
+						<li>
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsLabelList">Results Labels </a>
+						</li>
+						<li>
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsDocList">Results Docs </a>
+						</li>
+						<li>
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsReportList">Results Reports </a>
+						</li>
+						<li class="more">
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsDownload">Export</a>
+							
+						</li>
+						<li>
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadScheduledExportList">Scheduled Exports </a>
+						</li>
+						<li>
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsUpload">Import</a>
+							
+						</li>
+						<li>
+							<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadDeleteResults">Delete Results</a>
+							
+						</li>
+					
+					
+				</ul>
+			
+		</div>
+		<!-- END LEFT -->
+
+		<!-- BEGIN RIGHT -->
+		<div id="wrapper-right">
+			<header>
+				<h2>Results Table</h2>
+				<small>View and edit this form's stored results. <a href="https://support.formsite.com/hc/en-us/articles/360000244894-Results-Table" target="_blank" class="link-help">Help</a></small>
+				<div class="clear"></div>
+				
+				
+				
+			</header>
+			
+			
+	
+	<section id="selectors">
+		<div class="float-left">
+		<div class="setting">
+			<div class="search">
+				<input type="text" name="Search" id="Search" placeholder="Search" value="">
+				<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" onclick="Vromansys.doSearch();return false">Search</a>
+			</div>
+		</div>
+		</div>
+		
+		<div class="float-left">
+		<div class="setting" id="view-select">
+			<select name="DefaultView" id="DefaultView" onchange="doView();">
+				<optgroup label="Results Views"><option value="13" selected="selected">Results Table View</option>
+</optgroup>
+			</select>
+		</div>
+		</div>
+
+		<div class="float-left">
+		<div class="setting">
+			<select name="Filter" id="Filter" onchange="doFilter();">
+				<optgroup label="Results Filters"><option value="" selected="">No Filter</option>
+<option value="-10">Updated Today</option>
+<option value="-11">Updated Yesterday</option>
+<option value="-12">Updated Last 7 Days</option>
+<option value="-13">Updated Last 30 Days</option>
+<option value="-14">Updated This Month</option>
+<option value="-15">Updated Last Month</option>
+</optgroup>
+			</select>
+		</div>
+		</div>
+		
+		<div class="float-left">
+		<div class="setting" id="labels-select" style="padding-right: 10px;">
+			<select name="CustomLabel" id="CustomLabel" onchange="doLabel();">
+				<optgroup label="Results Labels"><option value="" selected="selected">Default Labels</option>
+</optgroup>
+			</select>
+		</div>
+		</div>
+		
+		<div class="clear"></div>
+	</section>
+	<div>
+		<div id="results-grid"><div id="ext-comp-1018" class="x-panel x-grid-panel" style="width: 1001px;"><div class="x-panel-bwrap" id="ext-gen3"><div class="x-panel-tbar x-panel-tbar-noheader" id="ext-gen4" style="width: 1001px;"><div id="ext-comp-1019" class="x-toolbar x-small-editor x-toolbar-layout-ct" style="width: 997px;"><table cellspacing="0" class="x-toolbar-ct"><tbody><tr><td class="x-toolbar-left" align="left"><table cellspacing="0"><tbody><tr class="x-toolbar-left-row"><td class="x-toolbar-cell" id="ext-gen25"><table id="ext-comp-1020" cellspacing="0" class="x-btn x-btn-text-icon link-trash x-item-disabled" style="width: auto;"><tbody class="x-btn-small x-btn-icon-small-left"><tr><td class="x-btn-tl"><i>&nbsp;</i></td><td class="x-btn-tc"></td><td class="x-btn-tr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-ml"><i>&nbsp;</i></td><td class="x-btn-mc"><em class="" unselectable="on"><button type="button" id="ext-gen26" class=" x-btn-text" style="background-image: url(&quot;/images/layout/internal2/icons/trash.svg&quot;);">Delete</button></em></td><td class="x-btn-mr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-bl"><i>&nbsp;</i></td><td class="x-btn-bc"></td><td class="x-btn-br"><i>&nbsp;</i></td></tr></tbody></table></td></tr></tbody></table></td><td class="x-toolbar-right" align="right"><table cellspacing="0" class="x-toolbar-right-ct"><tbody><tr><td><table cellspacing="0"><tbody><tr class="x-toolbar-right-row"><td class="x-toolbar-cell" id="ext-gen69"><table id="ext-comp-1024" cellspacing="0" class="x-btn x-btn-text-icon link-reset" style="width: auto;"><tbody class="x-btn-small x-btn-icon-small-left"><tr><td class="x-btn-tl"><i>&nbsp;</i></td><td class="x-btn-tc"></td><td class="x-btn-tr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-ml"><i>&nbsp;</i></td><td class="x-btn-mc"><em class="" unselectable="on"><button type="button" id="ext-gen30" class=" x-btn-text" style="background-image: url(&quot;/images/layout/internal2/icons/reset.svg&quot;);">Reset display</button></em></td><td class="x-btn-mr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-bl"><i>&nbsp;</i></td><td class="x-btn-bc"></td><td class="x-btn-br"><i>&nbsp;</i></td></tr></tbody></table></td><td class="x-toolbar-cell" id="ext-gen68"><table id="ext-comp-1022" cellspacing="0" class="x-btn x-btn-text-icon link-columns" style="width: auto;"><tbody class="x-btn-small x-btn-icon-small-left"><tr><td class="x-btn-tl"><i>&nbsp;</i></td><td class="x-btn-tc"></td><td class="x-btn-tr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-ml"><i>&nbsp;</i></td><td class="x-btn-mc"><em class="" unselectable="on"><button type="button" id="ext-gen28" class=" x-btn-text" style="background-image: url(&quot;/images/layout/internal2/icons/columns.svg&quot;);">Show/hide columns</button></em></td><td class="x-btn-mr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-bl"><i>&nbsp;</i></td><td class="x-btn-bc"></td><td class="x-btn-br"><i>&nbsp;</i></td></tr></tbody></table></td></tr></tbody></table></td><td><table cellspacing="0"><tbody><tr class="x-toolbar-extras-row"></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></div></div><div class="x-panel-body x-panel-body-noheader" id="ext-gen5" style="width: 1001px; height: 282px;"><div class="x-grid3" hidefocus="true" id="ext-gen11" style="width: 1001px; height: 282px;"><div class="x-grid3-viewport" id="ext-gen12"><div class="x-grid3-header" id="ext-gen13"><div class="x-grid3-header-inner" id="ext-gen15" style="width: 1001px;"><div class="x-grid3-header-offset" style="width:2331px;"><table border="0" cellspacing="0" cellpadding="0" style="width: 2312px;"><thead><tr class="x-grid3-hd-row"><td class="x-grid3-hd x-grid3-cell x-grid3-td-checker x-grid3-cell-first" style="width: 20px;"><div class="x-grid3-hd-inner x-grid3-hd-checker" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a><div class="x-grid3-hd-checker">&nbsp;</div><img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-controls" style="width: 100px;"><div class="x-grid3-hd-inner x-grid3-hd-controls" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a><img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-2" style="width: 115px;"><div class="x-grid3-hd-inner x-grid3-hd-2" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Reference #<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-3" style="width: 128px;text-align: center;"><div class="x-grid3-hd-inner x-grid3-hd-3" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" id="ext-gen72" style="height: 28px;"></a>Status<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-4" style="width: 113px;text-align: right;"><div class="x-grid3-hd-inner x-grid3-hd-4" unselectable="on" style="padding-right: 16px;"><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Amount<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-5" style="width: 137px;"><div class="x-grid3-hd-inner x-grid3-hd-5" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Payment<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-6 sort-desc" style="width: 100px;"><div class="x-grid3-hd-inner x-grid3-hd-6" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>First Name<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-7" style="width: 90px;"><div class="x-grid3-hd-inner x-grid3-hd-7" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Last Name<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-8" style="width: 66px;"><div class="x-grid3-hd-inner x-grid3-hd-8" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" id="ext-gen73" style="height: 28px;"></a>Address<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-9" style="width: 79px;"><div class="x-grid3-hd-inner x-grid3-hd-9" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>City<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-10" style="width: 95px;"><div class="x-grid3-hd-inner x-grid3-hd-10" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Phone Number<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-11" style="width: 99px;"><div class="x-grid3-hd-inner x-grid3-hd-11" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Email Address<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-12" style="width: 150px;"><div class="x-grid3-hd-inner x-grid3-hd-12" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>First Day:<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-13" style="width: 150px;"><div class="x-grid3-hd-inner x-grid3-hd-13" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Number of Nights<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-14" style="width: 150px;"><div class="x-grid3-hd-inner x-grid3-hd-14" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Suite Type (All prices per night)<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-15" style="width: 150px;"><div class="x-grid3-hd-inner x-grid3-hd-15" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Number of adults<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-16" style="width: 150px;"><div class="x-grid3-hd-inner x-grid3-hd-16" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>. (Number of children)<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-17" style="width: 150px;"><div class="x-grid3-hd-inner x-grid3-hd-17" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Optional Instructions/Questions<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-18" style="width: 145px;"><div class="x-grid3-hd-inner x-grid3-hd-18" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>Date<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td><td class="x-grid3-hd x-grid3-cell x-grid3-td-19 x-grid3-cell-last" style="width: 125px;"><div class="x-grid3-hd-inner x-grid3-hd-19" unselectable="on" style=""><a class="x-grid3-hd-btn" href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#"></a>User<img alt="" class="x-grid3-sort-icon" src="./resultstable_files/clear.gif"></div></td></tr></thead></table></div></div><div class="x-clear"></div></div><div class="x-grid3-scroller" id="ext-gen14" style="width: 1001px; height: 248px;"><div class="x-grid3-body" style="width:2312px;" id="ext-gen16"><div class="x-grid3-row x-grid3-row-first" style="width:2312px;"><table class="x-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="width:2312px;"><tbody><tr><td class="x-grid3-col x-grid3-cell x-grid3-td-checker x-selectable x-grid3-cell-first " style="width: 20px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-checker"><div class="x-grid3-row-checker">&nbsp;</div></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-controls x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-controls"><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="view" class="active-control view" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjErEOui3e7vm0PnWeMbbFK1CY67ydgkv74njqh0-izcTnl7GwFhoSS0rcZwiPvhs5jRHHBpgITyDm_KYCitsnLsgOH43FXYaXg&amp;View=11&amp;ResultNbr=15980598&quot;); trackEvent(&quot;Results_ResultsTable_View&quot;); return false" title="View this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="edit" class="active-control edit" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-AzE0KLDYI_3FQgJdx4l1HgL-eqCb33dv03xpMRwBv07MXFdCNqJ_QZA&amp;ResultNbr=15980598&quot;); trackEvent(&quot;Results_ResultsTable_Edit&quot;); return false" title="Edit this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="email" class="active-control email" onclick="Vromansys.showEmailResultDialog(&quot;15980598&quot;); trackEvent(&quot;Results_ResultsTable_Email&quot;); return false" title="Email this result"></a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-2 x-selectable " style="width: 115px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-2">15980598</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-3 x-selectable " style="cursor: pointer;width: 128px;text-align: center;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-3"><img src="./resultstable_files/status-complete.svg" alt="Confirmed" title="Confirmed" class="active-control"></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-4 x-selectable " style="width: 113px;text-align: right;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-4">$100.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-5 x-selectable " style="width: 137px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-5"><img src="./resultstable_files/status-incomplete.svg" alt="Payment Incomplete"> <a href="javascript:void(0)" class="payment-history" onclick="Formsite.Util.popWin(&#39;https://fs8.formsite.com/bld/FormSite?EParam=MBRKpCD2JG0ycT6pI3StqcG9p_TmJE4WKlkjt5YvvqOnhuzVGRPGmw&#39;)">History</a> 100.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-6 x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-6">Red</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-7 x-selectable " style="width: 90px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-7">Mark</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-8 x-selectable " style="width: 66px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-8">0124 kenya</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-9 x-selectable " style="width: 79px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-9">Nairobi</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-10 x-selectable " style="width: 95px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-10">0752687923</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-11 x-selectable " style="width: 99px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-11"><a href="mailto:red@gmail.com" target="_blank">red@gmail.com</a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-12 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-12">11/28/2022</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-13 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-13">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-14 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-14">Single Twin Bed - $50</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-15 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-15">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-16 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-16">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-17 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-17">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-18 x-selectable " style="width: 145px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-18"><span id="15980598-18" onmouseover="Vromansys.InfoPanel.show(&#39;15980598-18&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;Last Update:&lt;/strong&gt; 2022-11-27 10:11:14&lt;br&gt;&lt;strong&gt;Start Time:&lt;/strong&gt; 2022-11-27 10:01:11&lt;br&gt;&lt;strong&gt;Finish Time:&lt;/strong&gt; 2022-11-27 10:03:09&lt;br&gt;&lt;strong&gt;Duration:&lt;/strong&gt; 1m 58s&#39;);" onmouseout="Vromansys.InfoPanel.hide();">2022-11-27 10:11:14</span></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-19 x-selectable x-grid3-cell-last " style="width: 125px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-19"><span id="15980598-19" onmouseover="Vromansys.InfoPanel.show(&#39;15980598-19&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;IP:&lt;/strong&gt; 197.248.38.237&lt;br&gt;&lt;strong&gt;Browser:&lt;/strong&gt; Chrome&lt;br&gt;&lt;strong&gt;Device:&lt;/strong&gt; Desktop&lt;br&gt;&lt;strong&gt;Referrer:&lt;/strong&gt; N/A&#39;);" onmouseout="Vromansys.InfoPanel.hide();">197.248.38.237</span></div></td></tr></tbody></table></div><div class="x-grid3-row" style="width:2312px;"><table class="x-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="width:2312px;"><tbody><tr><td class="x-grid3-col x-grid3-cell x-grid3-td-checker x-selectable x-grid3-cell-first " style="width: 20px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-checker"><div class="x-grid3-row-checker">&nbsp;</div></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-controls x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-controls"><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="view" class="active-control view" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjErEOui3e7vm0PnWeMbbFK1CY67ydgkv74njqh0-izcTnl7GwFhoSS0rcZwiPvhs5jRHHBpgITyDm_KYCitsnLsgOH43FXYaXg&amp;View=11&amp;ResultNbr=15980606&quot;); trackEvent(&quot;Results_ResultsTable_View&quot;); return false" title="View this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="edit" class="active-control edit" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-AzE0KLDYI_3FQgJdx4l1HgL-eqCb33dv03xpMRwBv07MXFdCNqJ_QZA&amp;ResultNbr=15980606&quot;); trackEvent(&quot;Results_ResultsTable_Edit&quot;); return false" title="Edit this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="email" class="active-control email" onclick="Vromansys.showEmailResultDialog(&quot;15980606&quot;); trackEvent(&quot;Results_ResultsTable_Email&quot;); return false" title="Email this result"></a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-2 x-selectable " style="width: 115px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-2">15980606</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-3 x-selectable " style="cursor: pointer;width: 128px;text-align: center;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-3"><img src="./resultstable_files/status-complete.svg" alt="Confirmed" title="Confirmed" class="active-control"></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-4 x-selectable " style="width: 113px;text-align: right;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-4">$1,000.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-5 x-selectable " style="width: 137px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-5"><img src="./resultstable_files/status-incomplete.svg" alt="Payment Incomplete"> <a href="javascript:void(0)" class="payment-history" onclick="Formsite.Util.popWin(&#39;https://fs8.formsite.com/bld/FormSite?EParam=MBRKpCD2JG0ycT6pI3StqcG9p_TmJE4WKlkjt5YvvqME84ilNkBwaw&#39;)">History</a> 1,000.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-6 x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-6">Red</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-7 x-selectable " style="width: 90px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-7">Mark</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-8 x-selectable " style="width: 66px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-8">0124 kenya</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-9 x-selectable " style="width: 79px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-9">Nairobi</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-10 x-selectable " style="width: 95px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-10">0752687923</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-11 x-selectable " style="width: 99px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-11">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-12 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-12">11/28/2022</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-13 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-13">8</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-14 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-14">Two Twin Beds - $125</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-15 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-15">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-16 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-16">1</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-17 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-17">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-18 x-selectable " style="width: 145px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-18"><span id="15980606-18" onmouseover="Vromansys.InfoPanel.show(&#39;15980606-18&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;Last Update:&lt;/strong&gt; 2022-11-27 10:09:20&lt;br&gt;&lt;strong&gt;Start Time:&lt;/strong&gt; 2022-11-27 10:08:22&lt;br&gt;&lt;strong&gt;Finish Time:&lt;/strong&gt; 2022-11-27 10:09:10&lt;br&gt;&lt;strong&gt;Duration:&lt;/strong&gt; 0m 48s&#39;);" onmouseout="Vromansys.InfoPanel.hide();">2022-11-27 10:09:20</span></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-19 x-selectable x-grid3-cell-last " style="width: 125px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-19"><span id="15980606-19" onmouseover="Vromansys.InfoPanel.show(&#39;15980606-19&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;IP:&lt;/strong&gt; 197.248.38.237&lt;br&gt;&lt;strong&gt;Browser:&lt;/strong&gt; Chrome&lt;br&gt;&lt;strong&gt;Device:&lt;/strong&gt; Desktop&lt;br&gt;&lt;strong&gt;Referrer:&lt;/strong&gt; N/A&#39;);" onmouseout="Vromansys.InfoPanel.hide();">197.248.38.237</span></div></td></tr></tbody></table></div><div class="x-grid3-row" style="width:2312px;"><table class="x-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="width:2312px;"><tbody><tr><td class="x-grid3-col x-grid3-cell x-grid3-td-checker x-selectable x-grid3-cell-first " style="width: 20px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-checker"><div class="x-grid3-row-checker">&nbsp;</div></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-controls x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-controls"><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="view" class="active-control view" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjErEOui3e7vm0PnWeMbbFK1CY67ydgkv74njqh0-izcTnl7GwFhoSS0rcZwiPvhs5jRHHBpgITyDm_KYCitsnLsgOH43FXYaXg&amp;View=11&amp;ResultNbr=15980663&quot;); trackEvent(&quot;Results_ResultsTable_View&quot;); return false" title="View this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="edit" class="active-control edit" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-AzE0KLDYI_3FQgJdx4l1HgL-eqCb33dv03xpMRwBv07MXFdCNqJ_QZA&amp;ResultNbr=15980663&quot;); trackEvent(&quot;Results_ResultsTable_Edit&quot;); return false" title="Edit this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="email" class="active-control email" onclick="Vromansys.showEmailResultDialog(&quot;15980663&quot;); trackEvent(&quot;Results_ResultsTable_Email&quot;); return false" title="Email this result"></a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-2 x-selectable " style="width: 115px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-2">15980663</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-3 x-selectable " style="cursor: pointer;width: 128px;text-align: center;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-3"><img src="./resultstable_files/status-complete.svg" alt="Confirmed" title="Confirmed" class="active-control"></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-4 x-selectable " style="width: 113px;text-align: right;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-4">$50.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-5 x-selectable " style="width: 137px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-5"><img src="./resultstable_files/status-incomplete.svg" alt="Payment Incomplete"> <a href="javascript:void(0)" class="payment-history" onclick="Formsite.Util.popWin(&#39;https://fs8.formsite.com/bld/FormSite?EParam=MBRKpCD2JG0ycT6pI3StqcG9p_TmJE4WKlkjt5YvvqPuoB8t-tkRWA&#39;)">History</a> 50.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-6 x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-6">Red</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-7 x-selectable " style="width: 90px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-7">Mark</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-8 x-selectable " style="width: 66px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-8">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-9 x-selectable " style="width: 79px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-9">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-10 x-selectable " style="width: 95px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-10">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-11 x-selectable " style="width: 99px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-11">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-12 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-12">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-13 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-13">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-14 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-14">Single Twin Bed - $50</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-15 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-15">1</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-16 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-16">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-17 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-17">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-18 x-selectable " style="width: 145px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-18"><span id="15980663-18" onmouseover="Vromansys.InfoPanel.show(&#39;15980663-18&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;Last Update:&lt;/strong&gt; 2022-11-27 10:34:56&lt;br&gt;&lt;strong&gt;Start Time:&lt;/strong&gt; 2022-11-27 10:33:26&lt;br&gt;&lt;strong&gt;Finish Time:&lt;/strong&gt; 2022-11-27 10:34:52&lt;br&gt;&lt;strong&gt;Duration:&lt;/strong&gt; 1m 26s&#39;);" onmouseout="Vromansys.InfoPanel.hide();">2022-11-27 10:34:56</span></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-19 x-selectable x-grid3-cell-last " style="width: 125px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-19"><span id="15980663-19" onmouseover="Vromansys.InfoPanel.show(&#39;15980663-19&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;IP:&lt;/strong&gt; 197.248.38.237&lt;br&gt;&lt;strong&gt;Browser:&lt;/strong&gt; Chrome&lt;br&gt;&lt;strong&gt;Device:&lt;/strong&gt; Desktop&lt;br&gt;&lt;strong&gt;Referrer:&lt;/strong&gt; N/A&#39;);" onmouseout="Vromansys.InfoPanel.hide();">197.248.38.237</span></div></td></tr></tbody></table></div><div class="x-grid3-row" style="width:2312px;"><table class="x-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="width:2312px;"><tbody><tr><td class="x-grid3-col x-grid3-cell x-grid3-td-checker x-selectable x-grid3-cell-first " style="width: 20px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-checker"><div class="x-grid3-row-checker">&nbsp;</div></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-controls x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-controls"><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="view" class="active-control view" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjErEOui3e7vm0PnWeMbbFK1CY67ydgkv74njqh0-izcTnl7GwFhoSS0rcZwiPvhs5jRHHBpgITyDm_KYCitsnLsgOH43FXYaXg&amp;View=11&amp;ResultNbr=15980822&quot;); trackEvent(&quot;Results_ResultsTable_View&quot;); return false" title="View this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="edit" class="active-control edit" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-AzE0KLDYI_3FQgJdx4l1HgL-eqCb33dv03xpMRwBv07MXFdCNqJ_QZA&amp;ResultNbr=15980822&quot;); trackEvent(&quot;Results_ResultsTable_Edit&quot;); return false" title="Edit this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="email" class="active-control email" onclick="Vromansys.showEmailResultDialog(&quot;15980822&quot;); trackEvent(&quot;Results_ResultsTable_Email&quot;); return false" title="Email this result"></a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-2 x-selectable " style="width: 115px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-2">15980822</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-3 x-selectable " style="cursor: pointer;width: 128px;text-align: center;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-3"><img src="./resultstable_files/status-incomplete.svg" alt="Unconfirmed" title="Unconfirmed" class="active-control"></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-4 x-selectable " style="width: 113px;text-align: right;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-4">$100.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-5 x-selectable " style="width: 137px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-5"><img src="./resultstable_files/status-incomplete.svg" alt="Payment Incomplete"> <a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" onclick="alert(&#39;Order unconfirmed / No payment info found&#39;)">History</a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-6 x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-6">Red</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-7 x-selectable " style="width: 90px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-7">Blue</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-8 x-selectable " style="width: 66px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-8">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-9 x-selectable " style="width: 79px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-9">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-10 x-selectable " style="width: 95px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-10">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-11 x-selectable " style="width: 99px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-11">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-12 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-12">11/30/2022</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-13 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-13">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-14 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-14">Single Twin Bed - $50</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-15 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-15">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-16 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-16">0</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-17 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-17">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-18 x-selectable " style="width: 145px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-18"><span id="15980822-18" onmouseover="Vromansys.InfoPanel.show(&#39;15980822-18&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;Last Update:&lt;/strong&gt; 2022-11-27 12:17:24&lt;br&gt;&lt;strong&gt;Start Time:&lt;/strong&gt; 2022-11-27 12:15:00&lt;br&gt;&lt;strong&gt;Finish Time:&lt;/strong&gt; 2022-11-27 12:17:24&lt;br&gt;&lt;strong&gt;Duration:&lt;/strong&gt; 2m 24s&#39;);" onmouseout="Vromansys.InfoPanel.hide();">2022-11-27 12:17:24</span></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-19 x-selectable x-grid3-cell-last " style="width: 125px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-19"><span id="15980822-19" onmouseover="Vromansys.InfoPanel.show(&#39;15980822-19&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;IP:&lt;/strong&gt; 197.248.38.237&lt;br&gt;&lt;strong&gt;Browser:&lt;/strong&gt; Chrome&lt;br&gt;&lt;strong&gt;Device:&lt;/strong&gt; Desktop&lt;br&gt;&lt;strong&gt;Referrer:&lt;/strong&gt; N/A&#39;);" onmouseout="Vromansys.InfoPanel.hide();">197.248.38.237</span></div></td></tr></tbody></table></div><div class="x-grid3-row" style="width:2312px;"><table class="x-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="width:2312px;"><tbody><tr><td class="x-grid3-col x-grid3-cell x-grid3-td-checker x-selectable x-grid3-cell-first " style="width: 20px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-checker"><div class="x-grid3-row-checker">&nbsp;</div></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-controls x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-controls"><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="view" class="active-control view" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjErEOui3e7vm0PnWeMbbFK1CY67ydgkv74njqh0-izcTnl7GwFhoSS0rcZwiPvhs5jRHHBpgITyDm_KYCitsnLsgOH43FXYaXg&amp;View=11&amp;ResultNbr=15980839&quot;); trackEvent(&quot;Results_ResultsTable_View&quot;); return false" title="View this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="edit" class="active-control edit" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-AzE0KLDYI_3FQgJdx4l1HgL-eqCb33dv03xpMRwBv07MXFdCNqJ_QZA&amp;ResultNbr=15980839&quot;); trackEvent(&quot;Results_ResultsTable_Edit&quot;); return false" title="Edit this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="email" class="active-control email" onclick="Vromansys.showEmailResultDialog(&quot;15980839&quot;); trackEvent(&quot;Results_ResultsTable_Email&quot;); return false" title="Email this result"></a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-2 x-selectable " style="width: 115px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-2">15980839</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-3 x-selectable " style="cursor: pointer;width: 128px;text-align: center;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-3"><img src="./resultstable_files/status-complete.svg" alt="Confirmed" title="Confirmed" class="active-control"></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-4 x-selectable " style="width: 113px;text-align: right;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-4">$720.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-5 x-selectable " style="width: 137px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-5"><img src="./resultstable_files/status-incomplete.svg" alt="Payment Incomplete"> <a href="javascript:void(0)" class="payment-history" onclick="Formsite.Util.popWin(&#39;https://fs8.formsite.com/bld/FormSite?EParam=MBRKpCD2JG0ycT6pI3StqcG9p_TmJE4WKlkjt5YvvqOrtxks9yZfvg&#39;)">History</a> 720.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-6 x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-6">Red</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-7 x-selectable " style="width: 90px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-7">Mark</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-8 x-selectable " style="width: 66px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-8">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-9 x-selectable " style="width: 79px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-9">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-10 x-selectable " style="width: 95px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-10">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-11 x-selectable " style="width: 99px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-11">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-12 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-12">27/11/2022</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-13 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-13">4</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-14 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-14">Queen Bed - $180</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-15 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-15">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-16 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-16">1</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-17 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-17">Allergies</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-18 x-selectable " style="width: 145px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-18"><span id="15980839-18" onmouseover="Vromansys.InfoPanel.show(&#39;15980839-18&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;Last Update:&lt;/strong&gt; 2022-11-27 12:28:10&lt;br&gt;&lt;strong&gt;Start Time:&lt;/strong&gt; 2022-11-27 12:26:44&lt;br&gt;&lt;strong&gt;Finish Time:&lt;/strong&gt; 2022-11-27 12:28:01&lt;br&gt;&lt;strong&gt;Duration:&lt;/strong&gt; 1m 17s&#39;);" onmouseout="Vromansys.InfoPanel.hide();">2022-11-27 12:28:10</span></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-19 x-selectable x-grid3-cell-last " style="width: 125px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-19"><span id="15980839-19" onmouseover="Vromansys.InfoPanel.show(&#39;15980839-19&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;IP:&lt;/strong&gt; 197.248.38.237&lt;br&gt;&lt;strong&gt;Browser:&lt;/strong&gt; Chrome&lt;br&gt;&lt;strong&gt;Device:&lt;/strong&gt; Desktop&lt;br&gt;&lt;strong&gt;Referrer:&lt;/strong&gt; N/A&#39;);" onmouseout="Vromansys.InfoPanel.hide();">197.248.38.237</span></div></td></tr></tbody></table></div><div class="x-grid3-row" style="width:2312px;"><table class="x-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="width:2312px;"><tbody><tr><td class="x-grid3-col x-grid3-cell x-grid3-td-checker x-selectable x-grid3-cell-first " style="width: 20px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-checker"><div class="x-grid3-row-checker">&nbsp;</div></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-controls x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-controls"><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="view" class="active-control view" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjErEOui3e7vm0PnWeMbbFK1CY67ydgkv74njqh0-izcTnl7GwFhoSS0rcZwiPvhs5jRHHBpgITyDm_KYCitsnLsgOH43FXYaXg&amp;View=11&amp;ResultNbr=15980675&quot;); trackEvent(&quot;Results_ResultsTable_View&quot;); return false" title="View this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="edit" class="active-control edit" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-AzE0KLDYI_3FQgJdx4l1HgL-eqCb33dv03xpMRwBv07MXFdCNqJ_QZA&amp;ResultNbr=15980675&quot;); trackEvent(&quot;Results_ResultsTable_Edit&quot;); return false" title="Edit this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="email" class="active-control email" onclick="Vromansys.showEmailResultDialog(&quot;15980675&quot;); trackEvent(&quot;Results_ResultsTable_Email&quot;); return false" title="Email this result"></a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-2 x-selectable " style="width: 115px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-2">15980675</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-3 x-selectable " style="cursor: pointer;width: 128px;text-align: center;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-3"><img src="./resultstable_files/status-complete.svg" alt="Confirmed" title="Confirmed" class="active-control"></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-4 x-selectable " style="width: 113px;text-align: right;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-4">$1,000.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-5 x-selectable " style="width: 137px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-5"><img src="./resultstable_files/status-incomplete.svg" alt="Payment Incomplete"> <a href="javascript:void(0)" class="payment-history" onclick="Formsite.Util.popWin(&#39;https://fs8.formsite.com/bld/FormSite?EParam=MBRKpCD2JG0ycT6pI3StqcG9p_TmJE4WKlkjt5YvvqONFUYTc7TZ_A&#39;)">History</a> 1,000.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-6 x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-6">Dennis</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-7 x-selectable " style="width: 90px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-7">Mark</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-8 x-selectable " style="width: 66px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-8">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-9 x-selectable " style="width: 79px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-9">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-10 x-selectable " style="width: 95px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-10">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-11 x-selectable " style="width: 99px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-11">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-12 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-12">11/01/2022</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-13 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-13">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-14 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-14">King Bed - $500</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-15 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-15">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-16 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-16">0</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-17 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-17">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-18 x-selectable " style="width: 145px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-18"><span id="15980675-18" onmouseover="Vromansys.InfoPanel.show(&#39;15980675-18&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;Last Update:&lt;/strong&gt; 2022-11-27 10:41:08&lt;br&gt;&lt;strong&gt;Start Time:&lt;/strong&gt; 2022-11-27 10:40:19&lt;br&gt;&lt;strong&gt;Finish Time:&lt;/strong&gt; 2022-11-27 10:40:59&lt;br&gt;&lt;strong&gt;Duration:&lt;/strong&gt; 0m 40s&#39;);" onmouseout="Vromansys.InfoPanel.hide();">2022-11-27 10:41:08</span></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-19 x-selectable x-grid3-cell-last " style="width: 125px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-19"><span id="15980675-19" onmouseover="Vromansys.InfoPanel.show(&#39;15980675-19&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;IP:&lt;/strong&gt; 197.248.38.237&lt;br&gt;&lt;strong&gt;Browser:&lt;/strong&gt; Chrome&lt;br&gt;&lt;strong&gt;Device:&lt;/strong&gt; Desktop&lt;br&gt;&lt;strong&gt;Referrer:&lt;/strong&gt; N/A&#39;);" onmouseout="Vromansys.InfoPanel.hide();">197.248.38.237</span></div></td></tr></tbody></table></div><div class="x-grid3-row" style="width:2312px;"><table class="x-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="width:2312px;"><tbody><tr><td class="x-grid3-col x-grid3-cell x-grid3-td-checker x-selectable x-grid3-cell-first " style="width: 20px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-checker"><div class="x-grid3-row-checker">&nbsp;</div></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-controls x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-controls"><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="view" class="active-control view" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjErEOui3e7vm0PnWeMbbFK1CY67ydgkv74njqh0-izcTnl7GwFhoSS0rcZwiPvhs5jRHHBpgITyDm_KYCitsnLsgOH43FXYaXg&amp;View=11&amp;ResultNbr=15986937&quot;); trackEvent(&quot;Results_ResultsTable_View&quot;); return false" title="View this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="edit" class="active-control edit" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-AzE0KLDYI_3FQgJdx4l1HgL-eqCb33dv03xpMRwBv07MXFdCNqJ_QZA&amp;ResultNbr=15986937&quot;); trackEvent(&quot;Results_ResultsTable_Edit&quot;); return false" title="Edit this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="email" class="active-control email" onclick="Vromansys.showEmailResultDialog(&quot;15986937&quot;); trackEvent(&quot;Results_ResultsTable_Email&quot;); return false" title="Email this result"></a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-2 x-selectable " style="width: 115px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-2">15986937</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-3 x-selectable " style="cursor: pointer;width: 128px;text-align: center;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-3"><img src="./resultstable_files/status-complete.svg" alt="Confirmed" title="Confirmed" class="active-control"></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-4 x-selectable " style="width: 113px;text-align: right;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-4">$2,000.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-5 x-selectable " style="width: 137px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-5"><img src="./resultstable_files/status-incomplete.svg" alt="Payment Incomplete"> <a href="javascript:void(0)" class="payment-history" onclick="Formsite.Util.popWin(&#39;https://fs8.formsite.com/bld/FormSite?EParam=MBRKpCD2JG0ycT6pI3StqcG9p_TmJE4WKlkjt5YvvqPc1rSygwkcAQ&#39;)">History</a> 2,000.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-6 x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-6">Dennis</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-7 x-selectable " style="width: 90px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-7">Musyoka</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-8 x-selectable " style="width: 66px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-8">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-9 x-selectable " style="width: 79px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-9">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-10 x-selectable " style="width: 95px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-10">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-11 x-selectable " style="width: 99px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-11">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-12 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-12">30/11/2022</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-13 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-13">4</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-14 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-14">King Bed - $500</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-15 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-15">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-16 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-16">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-17 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-17">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-18 x-selectable " style="width: 145px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-18"><span id="15986937-18" onmouseover="Vromansys.InfoPanel.show(&#39;15986937-18&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;Last Update:&lt;/strong&gt; 2022-11-29 00:18:45&lt;br&gt;&lt;strong&gt;Start Time:&lt;/strong&gt; 2022-11-29 00:17:44&lt;br&gt;&lt;strong&gt;Finish Time:&lt;/strong&gt; 2022-11-29 00:18:21&lt;br&gt;&lt;strong&gt;Duration:&lt;/strong&gt; 0m 37s&#39;);" onmouseout="Vromansys.InfoPanel.hide();">2022-11-29 00:18:45</span></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-19 x-selectable x-grid3-cell-last " style="width: 125px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-19"><span id="15986937-19" onmouseover="Vromansys.InfoPanel.show(&#39;15986937-19&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;IP:&lt;/strong&gt; 197.248.38.237&lt;br&gt;&lt;strong&gt;Browser:&lt;/strong&gt; Chrome&lt;br&gt;&lt;strong&gt;Device:&lt;/strong&gt; Desktop&lt;br&gt;&lt;strong&gt;Referrer:&lt;/strong&gt; http://localhost/Luxury%20Hotel%20Web%20Management%20System/Reservation.html&#39;);" onmouseout="Vromansys.InfoPanel.hide();">197.248.38.237</span></div></td></tr></tbody></table></div><div class="x-grid3-row  x-grid3-row-last" style="width:2312px;"><table class="x-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="width:2312px;"><tbody><tr><td class="x-grid3-col x-grid3-cell x-grid3-td-checker x-selectable x-grid3-cell-first " style="width: 20px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-checker"><div class="x-grid3-row-checker">&nbsp;</div></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-controls x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-controls"><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="view" class="active-control view" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjErEOui3e7vm0PnWeMbbFK1CY67ydgkv74njqh0-izcTnl7GwFhoSS0rcZwiPvhs5jRHHBpgITyDm_KYCitsnLsgOH43FXYaXg&amp;View=11&amp;ResultNbr=15980730&quot;); trackEvent(&quot;Results_ResultsTable_View&quot;); return false" title="View this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="edit" class="active-control edit" onclick="Formsite.Util.popWin(&quot;https://fs8.formsite.com/bld/FormSite?EParam=Km8qHSeyW8B7w-CDfZGzjM8gHuCVlG-AzE0KLDYI_3FQgJdx4l1HgL-eqCb33dv03xpMRwBv07MXFdCNqJ_QZA&amp;ResultNbr=15980730&quot;); trackEvent(&quot;Results_ResultsTable_Edit&quot;); return false" title="Edit this result"></a>|<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" alt="email" class="active-control email" onclick="Vromansys.showEmailResultDialog(&quot;15980730&quot;); trackEvent(&quot;Results_ResultsTable_Email&quot;); return false" title="Email this result"></a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-2 x-selectable " style="width: 115px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-2">15980730</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-3 x-selectable " style="cursor: pointer;width: 128px;text-align: center;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-3"><img src="./resultstable_files/status-complete.svg" alt="Confirmed" title="Confirmed" class="active-control"></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-4 x-selectable " style="width: 113px;text-align: right;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-4">$1,000.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-5 x-selectable " style="width: 137px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-5"><img src="./resultstable_files/status-incomplete.svg" alt="Payment Incomplete"> <a href="javascript:void(0)" class="payment-history" onclick="Formsite.Util.popWin(&#39;https://fs8.formsite.com/bld/FormSite?EParam=MBRKpCD2JG0ycT6pI3StqcG9p_TmJE4WKlkjt5YvvqObL52k7wDUWw&#39;)">History</a> 1,000.00</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-6 x-selectable " style="width: 100px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-6">Black</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-7 x-selectable " style="width: 90px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-7">Red</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-8 x-selectable " style="width: 66px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-8">214 rosewood avenue</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-9 x-selectable " style="width: 79px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-9">Ney york</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-10 x-selectable " style="width: 95px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-10">0714589624</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-11 x-selectable " style="width: 99px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-11"><a href="mailto:red@gmail.com" target="_blank">red@gmail.com</a></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-12 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-12">11/28/2022</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-13 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-13">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-14 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-14">King Bed - $500</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-15 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-15">2</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-16 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-16">1</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-17 x-selectable " style="width: 150px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-17">&nbsp;</div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-18 x-selectable " style="width: 145px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-18"><span id="15980730-18" onmouseover="Vromansys.InfoPanel.show(&#39;15980730-18&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;Last Update:&lt;/strong&gt; 2022-11-27 11:18:33&lt;br&gt;&lt;strong&gt;Start Time:&lt;/strong&gt; 2022-11-27 11:14:28&lt;br&gt;&lt;strong&gt;Finish Time:&lt;/strong&gt; 2022-11-27 11:18:24&lt;br&gt;&lt;strong&gt;Duration:&lt;/strong&gt; 3m 56s&#39;);" onmouseout="Vromansys.InfoPanel.hide();">2022-11-27 11:18:33</span></div></td><td class="x-grid3-col x-grid3-cell x-grid3-td-19 x-selectable x-grid3-cell-last " style="width: 125px;" tabindex="0"><div class="x-grid3-cell-inner x-grid3-col-19"><span id="15980730-19" onmouseover="Vromansys.InfoPanel.show(&#39;15980730-19&#39;);Vromansys.InfoPanel.setText(&#39;&lt;strong&gt;IP:&lt;/strong&gt; 197.248.38.237&lt;br&gt;&lt;strong&gt;Browser:&lt;/strong&gt; Chrome&lt;br&gt;&lt;strong&gt;Device:&lt;/strong&gt; Desktop&lt;br&gt;&lt;strong&gt;Referrer:&lt;/strong&gt; https://fs8.formsite.com/res/submit&#39;);" onmouseout="Vromansys.InfoPanel.hide();">197.248.38.237</span></div></td></tr></tbody></table></div></div><a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" class="x-grid3-focus" tabindex="-1" id="ext-gen17" style="left: 1px; top: 0px;"></a></div></div><div class="x-grid3-resize-marker" id="ext-gen18">&nbsp;</div><div class="x-grid3-resize-proxy" id="ext-gen19">&nbsp;</div></div></div><div class="x-panel-bbar" id="ext-gen6" style="width: 1001px;"><div id="pagingToolbar" class="x-toolbar x-small-editor x-toolbar-layout-ct" style="width: 997px;"><table cellspacing="0" class="x-toolbar-ct"><tbody><tr><td class="x-toolbar-left" align="left"><table cellspacing="0"><tbody><tr class="x-toolbar-left-row"><td class="x-toolbar-cell" id="ext-gen31"><table id="ext-comp-1004" cellspacing="0" class="x-btn  x-btn-icon x-item-disabled"><tbody class="x-btn-small x-btn-icon-small-left"><tr><td class="x-btn-tl"><i>&nbsp;</i></td><td class="x-btn-tc"></td><td class="x-btn-tr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-ml"><i>&nbsp;</i></td><td class="x-btn-mc"><em class="" unselectable="on"><button type="button" id="ext-gen32" class=" x-btn-text x-tbar-page-first">&nbsp;</button></em></td><td class="x-btn-mr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-bl"><i>&nbsp;</i></td><td class="x-btn-bc"></td><td class="x-btn-br"><i>&nbsp;</i></td></tr></tbody></table></td><td class="x-toolbar-cell" id="ext-gen33"><table id="ext-comp-1005" cellspacing="0" class="x-btn  x-btn-icon x-item-disabled"><tbody class="x-btn-small x-btn-icon-small-left"><tr><td class="x-btn-tl"><i>&nbsp;</i></td><td class="x-btn-tc"></td><td class="x-btn-tr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-ml"><i>&nbsp;</i></td><td class="x-btn-mc"><em class="" unselectable="on"><button type="button" id="ext-gen34" class=" x-btn-text x-tbar-page-prev">&nbsp;</button></em></td><td class="x-btn-mr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-bl"><i>&nbsp;</i></td><td class="x-btn-bc"></td><td class="x-btn-br"><i>&nbsp;</i></td></tr></tbody></table></td><td class="x-toolbar-cell" id="ext-gen35"><span class="xtb-sep" id="ext-gen36"></span></td><td class="x-toolbar-cell" id="ext-gen37"><div class="xtb-text" id="ext-comp-1013">Page</div></td><td class="x-toolbar-cell" id="ext-gen38"><input type="text" size="20" autocomplete="off" id="ext-comp-1006" class="x-form-text x-form-field x-form-num-field x-tbar-page-number"></td><td class="x-toolbar-cell" id="ext-gen39"><div class="xtb-text" id="ext-comp-1007">of 1</div></td><td class="x-toolbar-cell" id="ext-gen40"><span class="xtb-sep" id="ext-gen41"></span></td><td class="x-toolbar-cell" id="ext-gen42"><table id="ext-comp-1008" cellspacing="0" class="x-btn  x-btn-icon x-item-disabled"><tbody class="x-btn-small x-btn-icon-small-left"><tr><td class="x-btn-tl"><i>&nbsp;</i></td><td class="x-btn-tc"></td><td class="x-btn-tr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-ml"><i>&nbsp;</i></td><td class="x-btn-mc"><em class="" unselectable="on"><button type="button" id="ext-gen43" class=" x-btn-text x-tbar-page-next">&nbsp;</button></em></td><td class="x-btn-mr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-bl"><i>&nbsp;</i></td><td class="x-btn-bc"></td><td class="x-btn-br"><i>&nbsp;</i></td></tr></tbody></table></td><td class="x-toolbar-cell" id="ext-gen44"><table id="ext-comp-1009" cellspacing="0" class="x-btn  x-btn-icon x-item-disabled"><tbody class="x-btn-small x-btn-icon-small-left"><tr><td class="x-btn-tl"><i>&nbsp;</i></td><td class="x-btn-tc"></td><td class="x-btn-tr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-ml"><i>&nbsp;</i></td><td class="x-btn-mc"><em class="" unselectable="on"><button type="button" id="ext-gen45" class=" x-btn-text x-tbar-page-last">&nbsp;</button></em></td><td class="x-btn-mr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-bl"><i>&nbsp;</i></td><td class="x-btn-bc"></td><td class="x-btn-br"><i>&nbsp;</i></td></tr></tbody></table></td><td class="x-toolbar-cell" id="ext-gen46"><span class="xtb-sep" id="ext-gen47"></span></td><td class="x-toolbar-cell" id="ext-gen48"><table id="ext-comp-1010" cellspacing="0" class="x-btn x-btn-icon"><tbody class="x-btn-small x-btn-icon-small-left"><tr><td class="x-btn-tl"><i>&nbsp;</i></td><td class="x-btn-tc"></td><td class="x-btn-tr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-ml"><i>&nbsp;</i></td><td class="x-btn-mc"><em class="" unselectable="on"><button type="button" id="ext-gen49" class=" x-btn-text x-tbar-loading">&nbsp;</button></em></td><td class="x-btn-mr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-bl"><i>&nbsp;</i></td><td class="x-btn-bc"></td><td class="x-btn-br"><i>&nbsp;</i></td></tr></tbody></table></td></tr></tbody></table></td><td class="x-toolbar-right" align="right"><table cellspacing="0" class="x-toolbar-right-ct"><tbody><tr><td><table cellspacing="0"><tbody><tr class="x-toolbar-right-row"><td class="x-toolbar-cell" id="ext-gen71"><div class="xtb-text" id="ext-comp-1011">Displaying results 1 - 8 of 8</div></td><td class="x-toolbar-cell" id="ext-gen70"><div class="x-form-field-wrap x-form-field-trigger-wrap" id="ext-gen51" style="width: 220px;"><input type="text" size="24" autocomplete="off" id="ext-comp-1003" name="ext-comp-1003" class="x-form-text x-form-field x-trigger-noedit" readonly="" style="width: 195px;"><img src="./resultstable_files/clear.gif" alt="" class="x-form-trigger x-form-arrow-trigger" id="ext-gen52"></div></td></tr></tbody></table></td><td><table cellspacing="0"><tbody><tr class="x-toolbar-extras-row"></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></div></div></div></div></div>
+	</div>
+	
+
+	<input name="ResultNbr" id="ResultNbr" value="" type="hidden">
+	<input name="ItemNbr" id="ItemNbr" value="" type="hidden">
+	<input name="SubNbr" id="SubNbr" value="" type="hidden">
+
+			
+		</div>
+		<!-- END RIGHT -->
+		
+		<input type="hidden" name="FormNbr" value="0">
+		</form>
+	</div>
+	
+	
+	
+	
+
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+
+	
+	
+	
+	
+	
+	<script src="./resultstable_files/events.js.download"></script>
+	<script>
+		trackEvent("LoadResultsTable", "#wrapper-left header h2", "#menu-left li.active a:first", "#wrapper-right header h2");
+	</script>
+	
+	
+
+<div id="ext-gen20" class="x-dd-drag-proxy x-dd-drop-nodrop x-grid3-col-dd" style="position: absolute; z-index: 15000; visibility: hidden; left: -10000px; top: -10000px;"><div class="x-dd-drop-icon"></div><div class="x-dd-drag-ghost" id="ext-gen21"></div></div><div class="col-move-top" id="ext-gen22">&nbsp;</div><div class="col-move-bottom" id="ext-gen23">&nbsp;</div><div tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons" aria-describedby="dialog-email" aria-labelledby="ui-id-1" style="display: none;"><div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix"><span id="ui-id-1" class="ui-dialog-title">Upgrade Required</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" title="Close"><span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button></div><div id="dialog-email" class="ui-dialog-content ui-widget-content">
+		<div class="setting">
+			This feature requires a paid account. <a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadUpgradeRenew">Upgrade now</a>.
+		</div>
+	</div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" class="button-secondary ui-button ui-corner-all ui-widget">Close</button></div></div></div><div tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front dialog-danger ui-dialog-buttons" aria-describedby="dialog-delete" aria-labelledby="ui-id-2" style="display: none;"><div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix"><span id="ui-id-2" class="ui-dialog-title">Danger!</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" title="Close"><span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button></div><div id="dialog-delete" class="ui-dialog-content ui-widget-content">
+		<div class="setting">
+			Are you sure you want to <strong>delete</strong> the selected results? This cannot be undone.
+		</div>
+	</div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" class="button-delete ui-button ui-corner-all ui-widget">Yes, delete it</button><button type="button" class="button-cancel ui-button ui-corner-all ui-widget">No, keep it</button></div></div></div><div tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front dialog-danger ui-dialog-buttons" aria-describedby="dialog-delete-file" aria-labelledby="ui-id-3" style="display: none;"><div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix"><span id="ui-id-3" class="ui-dialog-title">Danger!</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" title="Close"><span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button></div><div id="dialog-delete-file" class="ui-dialog-content ui-widget-content">
+		<div class="setting">
+			Are you sure you want to <strong>delete</strong> this file? This cannot be undone.
+		</div>
+	</div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" class="button-delete ui-button ui-corner-all ui-widget">Yes, delete it</button><button type="button" class="button-cancel ui-button ui-corner-all ui-widget">No, keep it</button></div></div></div><div tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons" aria-describedby="dialog-columns" aria-labelledby="ui-id-4" style="display: none;"><div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix"><span id="ui-id-4" class="ui-dialog-title">Show Columns</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" title="Close"><span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button></div><div id="dialog-columns" class="ui-dialog-content ui-widget-content">
+	
+
+	<div class="setting" style="margin-bottom:10px">
+		<a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" onclick="Vromansys.itemSelectorCheckAll(true);return false">Check all</a> | <a href="https://fs8.formsite.com/bld/FormSite?FormId=LoadResultsTable#" onclick="Vromansys.itemSelectorCheckAll(false);return false">Clear all</a>
+	</div>
+
+	<div class="setting">
+		<form name="item-selector-form" id="item-selector-form">
+		<div class="choices" id="item-selector" style="position: relative; white-space: nowrap; overflow: hidden auto; height: 243px;">
+			<input type="checkbox" name="REF_NUM" id="itemSelector-REF_NUM" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-REF_NUM"><i>Reference #</i></label><br>
+			
+			<input type="checkbox" name="ORDER_AMOUNT" id="itemSelector-ORDER_AMOUNT" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-ORDER_AMOUNT"><i>Order Amount</i></label><br>
+			<input type="checkbox" name="PAYPAL" id="itemSelector-PAYPAL" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-PAYPAL"><i>Payment History</i></label><br>
+			
+			
+			
+			<input type="checkbox" name="STATUS" id="itemSelector-STATUS" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-STATUS"><i>Status</i></label><br>
+			
+			<input type="checkbox" name="Item-2" id="itemSelector-2" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-2">First Name</label><br>
+			
+			<input type="checkbox" name="Item-3" id="itemSelector-3" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-3">Last Name</label><br>
+			
+			<input type="checkbox" name="Item-5" id="itemSelector-5" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-5">Address</label><br>
+			
+			<input type="checkbox" name="Item-6" id="itemSelector-6" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-6">City</label><br>
+			
+			<input type="checkbox" name="Item-9" id="itemSelector-9" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-9">Phone Number</label><br>
+			
+			<input type="checkbox" name="Item-10" id="itemSelector-10" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-10">Email Address</label><br>
+			
+			<input type="checkbox" name="Item-13" id="itemSelector-13" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-13">First Day:</label><br>
+			
+			<input type="checkbox" name="Item-14" id="itemSelector-14" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-14">Number of Nights</label><br>
+			
+			<input type="checkbox" name="Item-15" id="itemSelector-15" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-15">Suite Type (All prices per night)</label><br>
+			
+			<input type="checkbox" name="Item-38" id="itemSelector-38" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-38">Number of adults</label><br>
+			
+			<input type="checkbox" name="Item-40" id="itemSelector-40" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-40">Number of children</label><br>
+			
+			<input type="checkbox" name="Item-19" id="itemSelector-19" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-19">Optional Instructions/Questions</label><br>
+			
+			<input type="checkbox" name="DATE" id="itemSelector-DATE" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-DATE"><i>Date</i></label><br>
+			<input type="checkbox" name="USER" id="itemSelector-USER" checked="checked" onclick="Vromansys.itemSelectorChange()"> <label for="itemSelector-USER"><i>User</i></label>
+		</div>
+		</form>
+	</div>
+</div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" class="button-primary ui-button ui-corner-all ui-widget">Save</button><button type="button" class="button-cancel ui-button ui-corner-all ui-widget">Cancel</button></div></div></div><div tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons" aria-describedby="dialog-sending" aria-labelledby="ui-id-5" style="display: none;"><div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix"><span id="ui-id-5" class="ui-dialog-title">Sending Email</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" title="Close"><span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button></div><div id="dialog-sending" class="ui-dialog-content ui-widget-content">
+		<div style="width:43px;margin-left:auto;margin-right:auto;" class="setting">
+			<img src="./resultstable_files/ajax-loader-dots.gif" alt="">
+		</div>
+	</div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" class="button-secondary ui-button ui-corner-all ui-widget">Close</button></div></div></div><div tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons" aria-describedby="dialog-permissions" aria-labelledby="ui-id-6" style="display: none;"><div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix"><span id="ui-id-6" class="ui-dialog-title">No Permission</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" title="Close"><span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button></div><div id="dialog-permissions" class="ui-dialog-content ui-widget-content">
+		<div class="setting">
+			You do not have permission to delete results/attachments. This function requires read, write permission on this form. <br> <br> <p>You are using a limited access sub-user. Contact your admin if you need access to this function.</p>
+		</div>
+	</div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" class="button-secondary ui-button ui-corner-all ui-widget">Close</button></div></div></div><div style="width:0px; height:0px; display:none; visibility:hidden;" id="batBeacon647935365247"><img style="width:0px; height:0px; display:none; visibility:hidden;" id="batBeacon8451133360" width="0" height="0" alt="" src="./resultstable_files/0"></div></body></html>

@@ -1,0 +1,876 @@
+Formsite = {}, Formsite.Util = {};
+$.ajaxSetup({ cache: false }); // fix to make ajax work in Edge
+window.dataLayer = window.dataLayer || []; // Google analytics
+
+/**
+ * Utils.
+ */
+Formsite.Util = (function() {
+	var bufferRefs = { };
+
+	return {
+		bufferCalls: function(func, ms) {
+			return function() {
+				var origArguments = arguments;
+
+				if(bufferRefs[func]) {
+					clearTimeout(bufferRefs[func]);
+				}
+
+				bufferRefs[func] = setTimeout(function() {
+					func.apply(this, origArguments);
+					delete bufferRefs[func];
+				}, ms);
+			};
+		},
+
+		copyToClipboard: function(copyEl, triggerEl) {
+			if($.type(copyEl) === "string") {
+				copyEl = document.getElementById(copyEl);
+			}
+			if($.type(triggerEl) === "string") {
+				triggerEl = document.getElementById(triggerEl);
+			}
+
+			copyEl = $(copyEl);
+			triggerEl = $(triggerEl);
+
+			var tempInput = $("<textarea style='position:absolute;left:-9999px;top:-9999px'></textarea>").appendTo(copyEl.parent());
+
+			if(copyEl.is("input, textarea")) {
+				tempInput.val($.trim(copyEl.val()));
+			} else {
+				tempInput.val($.trim(copyEl.text()));
+			}
+
+			if(navigator.userAgent.match(/ipad|iphone/i)) {
+				tempInput.prop("contentEditable", true).prop("readOnly", true);
+
+				var range = document.createRange();
+				range.selectNodeContents(tempInput[0]);
+
+				var selection = window.getSelection();
+				selection.removeAllRanges();
+				selection.addRange(range);
+
+				tempInput[0].setSelectionRange(0, 999999);
+				tempInput.prop("contentEditable", false).prop("readOnly", false);
+			} else {
+				tempInput.trigger("select");
+			}
+
+			document.execCommand("copy");
+			tempInput.remove();
+
+			if(triggerEl.text() == "Copy") {
+				triggerEl.text("Copied!");
+
+				setTimeout(function() {
+					triggerEl.text("Copy");
+				}, 1500);
+			}
+		},
+
+		getUrlParam: function(name) {
+			var values = new RegExp("[?&]+" + name + "=([^&]*)").exec(window.location.search);
+
+			if(values) {
+				return values[1] || null;
+			} else {
+				return null;
+			}
+		},
+
+		popWin: function(location, width, height) {
+			if(!width) {
+				width = screen.width / 2;
+			}
+			if(!height) {
+				height = screen.height / 2;
+			}
+			var x = width / 2;
+			var y = height / 2;
+			var win = window.open(location, "helper", "menubar=yes,height=" + height + ", width=" + width + ", screenX=" + x + ", screenY=" + y + ", resizable=1, scrollbars=1");
+			win.focus();
+		},
+
+		tmpl: function(html, opts) {
+			opts = opts || { };
+
+			$.each(opts, function(key, value) {
+				html = html.split("{" + key + "}").join(value);
+			});
+
+			return html;
+		}
+	};
+})();
+Formsite.Util.Ajax = (function() {
+	return {
+		postForm: function(form, options) {
+			$.ajax({
+				type: "POST",
+				url: "/bld/FormSite",
+				data: $(form).serialize(),
+				dataType: "text",
+				error: function(xhr, status, error) {
+					alert("Unexpected error. Please reload the page and try again.");
+					console.log(status + ": " + error);
+				},
+				success: function(data) {
+					if(data.indexOf("SUCCESS: ") === 0) {
+						data = data.substring("SUCCESS: ".length, data.length);
+						data = {
+							"status": "success",
+							"message": data
+						};
+					} else if(data.indexOf("{") === 0) {
+						data = JSON.parse(data);
+					} else {
+						if(data.indexOf("<html>") > -1 && data.indexOf("FormLogin") > -1) {
+							// attempt to handle logout
+							window.location.reload();
+						} else if(data.indexOf("ERROR: ") === 0) {
+							data = data.substring("ERROR: ".length, data.length);
+						}
+
+						data = {
+							"status": "error",
+							"message": data
+						};
+					}
+
+					if(options.before) {
+						options.before(data);
+					}
+
+					if(data.status) {
+						if(data.status == "success" && options.success) {
+							options.success(data);
+						} else if(data.status == "error" && options.error) {
+							options.error(data);
+						} else {
+							alert("Unhandled status: " + data);
+						}
+					} else {
+						alert("Unhandled response: " + data);
+					}
+
+					if(options.after) {
+						options.after(data);
+					}
+				}
+			});
+		}
+	}
+})();
+Formsite.Util.Dialog = (function() {
+	return {
+		alert: function(title, message, callback) {
+			var dialog = $("#dialog-alert");
+			var dialogClass = title.match(/error|invalid|sorry/i) ? "dialog-error" : message.indexOf('Touch') !== -1 ? undefined : "desktop";
+
+			if(dialog.length) {
+				dialog.dialog("option", "title", title).html(message);
+			} else {
+				dialog = $('<div id="dialog-alert" title="' + title + '">' + message + '</div>');
+			}
+
+			dialog.dialog({
+				autoOpen: true,
+				dialogClass: dialogClass,
+				buttons: [
+					{
+						text: "OK",
+						click: function() {
+							if(callback) {
+								callback();
+							}
+
+							$(this).dialog("close");
+						},
+						class: "button-secondary"
+					}
+				]
+			});
+		},
+		delete: function(title, message, callback) {
+			var dialog = $("#dialog-delete");
+			var dialogClass = "dialog-danger";
+
+			if(dialog.length) {
+				dialog.dialog("option", "title", title).html(message);
+			} else {
+				dialog = $('<div id="dialog-delete" title="' + title + '">' + message + '</div>');
+			}
+
+			dialog.dialog({
+				autoOpen: true,
+				dialogClass: dialogClass,
+				buttons: [
+					{
+						text: "Yes, delete it",
+						click: function() {
+							if(callback) {
+								callback();
+							}
+
+							$(this).dialog("close");
+						},
+						class: "button-delete"
+					}, {
+						text: "No, keep it",
+						click: function() {
+							$(this).dialog("close");
+						},
+						class: "button-cancel"
+					}
+				]
+			});
+		}
+	};
+})();
+Formsite.Util.Layout = (function() {
+	return {
+		removeAllErrors: function() {
+			var elRight = $("#wrapper-right");
+
+			elRight.find(".setting-error").removeClass("setting-error");
+			elRight.find("small.error-message").remove();
+		},
+
+		reset: function(el) {
+			var $el = $(el);
+
+			$el.html($el.data("reset"));
+		},
+
+		setPageMessage: function(type, message) {
+			$("#wrapper-right header div.message").remove();
+
+			if(message) {
+				var messageEl = $('<div class="message message-' + type + '""><a class="close" alt="close"></a>' + message + "</div>").hide();
+				messageEl.appendTo("#wrapper-right header").show("fade");
+				$("#wrapper-right").scrollTop(0);
+				Formsite.Util.Init.messages();
+			}
+
+			$(window).trigger("resize");
+		},
+
+		toggleLeft: function() {
+			var size = 280;
+			var elLeft = $("#wrapper-left");
+			var elRight = $("#wrapper-right");
+			var elMenu = $("#menu-left");
+			var elToggler = $("#toggler-left");
+
+			if(elLeft.position().left < 0) {
+				elLeft.css("left", "");
+				elRight.css("left", "");
+				elMenu.show();
+				elToggler.html("<img src='/images/layout/internal2/icons/column-collapse.svg' alt='&#9668;'>");
+				document.cookie = "toggleLeft=true";
+			} else {
+				elLeft.css("left", "-" + size + "px");
+				elRight.css("left", (elRight.position().left - size) + "px");
+				elMenu.hide();
+				elToggler.html("<img src='/images/layout/internal2/icons/column-expand.svg' alt='&#9658;'>");
+				document.cookie = "toggleLeft=false";
+			}
+
+			if(typeof grid == "object") {
+				// super special for resize summary table
+				grid.doLayout();
+			}
+		},
+
+		spinnerize: function(el) {
+			var $el = $(el);
+
+			$el.data("reset", $el.html());
+			$el.html('<span class="spinner"></span>');
+
+			// workaround for disabled button can't submit
+			setTimeout(function () {
+				$el.prop("disabled", true);
+			}, 1);
+		}
+	}
+})();
+Formsite.Util.Storage = (function() {
+	function _clear(storage) {
+		try {
+			storage.clear();
+		} catch(e) {
+			// no storage
+		}
+	}
+
+	function _get(storage, key) {
+		try {
+			return storage.getItem(key);
+		} catch(e) {
+			// no storage
+		}
+	}
+
+	function _remove(storage) {
+		try {
+			var value = storage.get(key);
+
+			storage.removeItem(key);
+
+			return value;
+		} catch(e) {
+			// no storage
+		}
+	}
+
+	function _set(storage, key, value) {
+		try {
+			storage.setItem(key, value);
+		} catch(e) {
+			// no storage
+		}
+	}
+
+	return {
+		localClear: function() {
+			_clear(window.localStorage);
+		},
+
+		localGet: function(key) {
+			return _get(window.localStorage, key);
+		},
+
+		localRemove: function(key) {
+			return _remove(window.localStorage, key);
+		},
+
+		localSet: function(key, value) {
+			_set(window.localStorage, key, value);
+		},
+
+		sessionClear: function() {
+			_clear(window.sessionStorage);
+		},
+
+		sessionGet: function(key) {
+			return _get(window.sessionStorage, key);
+		},
+
+		sessionRemove: function(key) {
+			return _remove(window.sessionStorage, key);
+		},
+
+		sessionSet: function(key, value) {
+			_set(window.sessionStorage, key, value);
+		}
+	}
+})();
+Formsite.Util.Init = (function() {
+	return {
+		calendars: function() {
+			$("input.calendar").datepicker({ changeYear:true, dateFormat:"yy-mm-dd" });
+		},
+
+		passwords: function() {
+			$("input.password").on("focus",function () {
+				$(this).prop('type', 'text');
+			}).on("blur",function () {
+				$(this).prop('type', 'password');
+			});
+		},
+
+		inlineFields: function() {
+			$("input.toggler").inlineField();
+		},
+
+		menus: function() {
+			$(".menu-pop").each(function() {
+				var menuEl = $(this);
+				var triggerEl = $("#" + this.id + "-trigger");
+
+				if(menuEl.has("li").length > 0) {
+					new Formsite.MenuPop(menuEl, triggerEl);
+				} else {
+					// remove trigger icon
+					triggerEl.find("span").css({ background: "none", cursor: "default" });
+				}
+			});
+
+			$("#menu-forms-search").find("input").on("change input", function() {
+				var word = $(this).val().toLowerCase();
+				var rows = $("#menu-forms-forms").find("li");
+
+				if(word.length < 1) {
+					rows.removeClass("display-none");
+				} else {
+					rows.each(function() {
+						var text = $(this).text().toLowerCase();
+
+						if(text.indexOf(word) > -1) {
+							$(this).removeClass("display-none");
+						} else {
+							$(this).addClass("display-none");
+						}
+					});
+				}
+			});
+		},
+
+		messages: function() {
+			$("#wrapper-right .message a.close").on("click", function() {
+				$(this).parent().hide("slide", function() {
+					$(window).trigger("resize");
+				});
+			});
+		},
+
+		panels: function() {
+			$("section.toggler, div.toggler").panel();
+		},
+
+		textEditors: function(isFull, optsExtra) {
+			if($("script[src*='tinymce4']").length < 1) {
+				 return; // nothing to do
+			}
+
+			var opts = {
+				mode: "textareas",
+				editor_selector: "editor",
+				theme: "vromansys",
+				height: 140,
+				plugins: "code,image,link,paste,table,textcolor",
+				convert_urls: false,
+				entities: "160,nbsp", // do not encode special characters, just nbsps
+				forced_root_block: (isFull ? "div" : false),
+				width: "auto",
+				toolbar1: (isFull ? "fontsizeselect | fontselect" : "fontsizeselect | fontselect | bold italic underline forecolor backcolor | link image | removeformat code"),
+				toolbar2: (isFull ? "bold italic underline | alignleft aligncenter alignright | forecolor backcolor | link image | removeformat code" : ""),
+				setup: function (ed) {
+					if($(ed.getElement()).hasClass("toggler")) {
+						var self = this;
+						var show = function () {
+							var edEl = $(self.contentAreaContainer.parentElement).removeClass("inactive");
+							edEl.find(".mce-edit-area").css("border-width", "");
+							edEl.find("div.mce-toolbar-grp").show();
+							edEl.find("div.mce-statusbar").show();
+							self.theme.resizeTo("100%", ed.settings.height);
+						};
+						var hide = function () {
+							var edEl = $(self.contentAreaContainer.parentElement).addClass("inactive");
+							edEl.find(".mce-edit-area").css("border-width", "0");
+							edEl.find("div.mce-toolbar-grp").hide();
+							edEl.find("div.mce-statusbar").hide();
+							self.theme.resizeTo("100%", 100);
+						};
+						ed.on("focus", show);
+						ed.on("init", hide);
+					}
+				}, file_picker_callback: function(callback, value, meta) {
+					var win = this.windowManager.open({
+						title: "Choose file",
+						body: {
+							type: "container",
+							html: '<div id="chooser-file"></div>',
+							minHeight: 370,
+							minWidth: 458
+						},
+						buttons: [{
+							text: "Cancel",
+							subtype: "primary",
+							onclick: "close"
+						}],
+					});
+
+					$("#chooser-file").fileChooser({ accept:meta.filetype + "/*", selected:function(url) { callback(url); win.submit(); } });
+					$("#chooser-file").find("button").removeClass().wrap('<div class="mce-btn"></div>');
+					$("#chooser-file").find(".setting").css("marginBottom", "10px");
+					$("#chooser-file").fileChooser("load");
+				}
+			};
+
+			$.extend(opts, optsExtra);
+			$(".setting:has('textarea.editor')").css("margin-right", "0");
+			tinymce.init(opts);
+		}
+	}
+})();
+
+
+/**
+ * Page chooser bubble menu.
+ */
+ Formsite.MenuBubble = function(mode) {
+	var _el = $("#menu-bubble");
+	var _elSearch = _el.find(".bubble-search input[type=search]")
+	var _formNbr = $("#form-settings input[name='FormNbr']").val();
+	var _title = $("#wrapper-right").find("h2").text();
+	var _mode = mode;
+
+	if(_title.substr(-1) == "s") {
+		_title = _title.slice(0, -1);
+	}
+
+	function _doSearch() {
+		var word = _elSearch.val().toLowerCase();
+		var rows = _el.find(".bubble-box");
+
+		if(word.length < 1) {
+			rows.removeClass("display-none");
+		} else {
+			rows.each(function() {
+				var row = $(this);
+				var text = "";
+
+				row.find(".searchable").each(function() {
+					text += this.textContent.toLowerCase() + " ";
+				});
+
+				if(text.indexOf(word) > -1) {
+					row.removeClass("display-none");
+				} else {
+					row.addClass("display-none");
+				}
+			});
+		}
+	}
+
+	_el.find(".bubble-box").on("mouseover", function() {
+		// kludge: use "mouseover" to fix mouse already in bounds on page load
+		var el = $(this);
+
+		el.siblings().removeClass("active");
+
+		if(!el.hasClass("active")) {
+			var links = el.find("a");
+
+			links.css("pointer-events", "none");
+			el.addClass("active");
+
+			// kludge to prevent simultaneous hover click
+			setTimeout(function() {
+				links.css("pointer-events", "");
+			}, 1);
+		}
+	}).each(function() {
+		var el = $(this);
+		var nbr = el.data("nbr");
+
+		el.find("a").each(function() {
+			var link = $(this);
+
+			link.prop("title", link.find("span").text());
+		});
+
+		el.find(".link-delete").on("click", function(evn) {
+			evn.preventDefault();
+
+			var link = $(this);
+
+			Formsite.Util.Dialog.delete("Danger!", "Are you sure you want to <strong>delete</strong> this " + _title + "? This cannot be undone.", function() {
+				window.location.href = link.prop("href") + "&Confirm";
+			});
+		});
+	});
+
+	_elSearch.on("keypress", function(evn) {
+		return evn.keyCode != 13;
+	}).on("input", Formsite.Util.bufferCalls(_doSearch, 100));
+
+	if(_mode == "permanent") {
+		var markNbr = Formsite.Util.getUrlParam("Nbr");
+
+		if(markNbr) {
+			var el = $("#bubble-box-" + markNbr).addClass("marked").trigger("mouseover");
+
+			if(el.length) {
+				var containerTop = $("#wrapper-right").offset().top;
+				var elBottom = el.offset().top + el.outerHeight();
+				var windowHeight = $(window).height();
+
+				console.log("elBottom:" + elBottom + " windowHeight:" + windowHeight);
+
+				if(elBottom > windowHeight) {
+					console.log("off the page!");
+					console.log("scrolling to: " + (elBottom - windowHeight));
+
+					$("#wrapper-right").scrollTop(elBottom - windowHeight + 50);
+				}
+			}
+		} else {
+			_elSearch.focus();
+			_el.find(".bubble-box").first().trigger("mouseover");
+		}
+	} else if(_mode == "temporary") {
+		_el.find(".bubble-box").on("mouseleave", function() {
+			$(this).removeClass("active");
+		});
+	}
+};
+
+/**
+ * Page top popup menu.
+ */
+Formsite.MenuPop = function(menuEl, triggerEl) {
+	var menuEl = $(menuEl);
+	var triggerEl = $(triggerEl);
+
+	if(menuEl.children().length > 0) {
+		var _show = function(evn) {
+			menuEl.slideDown(100, function() {
+				menuEl.find(".active").closest("div").prop("scrollTop", menuEl.find(".active").prop("offsetTop") - 30);
+			});
+			menuEl.find("input").first().trigger("focus");
+		};
+		var _hide = function(evn) {
+			menuEl.hide();
+		};
+		var _hideConditional = function(evn) {
+			if(!$(evn.target).closest(".menu-pop").length) {
+				if(menuEl.is(":visible")) {
+					_hide();
+				}
+			}
+		}
+
+		triggerEl.on("click", function(evn) {
+			if(menuEl.is(":visible")) {
+				_hide();
+			} else {
+				_show();
+			}
+
+			evn.stopPropagation();
+		});
+
+		$(document).on("click", _hideConditional);
+		$(window).on("blur", _hideConditional);
+	}
+};
+
+/**
+ * jQuery inline field editor widget.
+ */
+$.widget("formsite.inlineField", {
+	options: { },
+
+	_create: function() {
+		var el = this.element;
+		var proxyEl = $("<span></span>").insertBefore(el);
+
+		el.on("blur", $.proxy(function() {
+			el.css({
+				visibility: "hidden",
+				width: "0"
+			});
+
+			el.closest("h3").removeClass("active");
+
+			var val = el.val($.trim(el.val())).val();
+
+			if(val.length < 1) {
+				val = el.attr("placeholder") || "";
+			}
+
+			proxyEl.text(val);
+			proxyEl.html(proxyEl.html() + ' <a class="link-edit" href="#">Edit</a>');
+		}, this));
+
+		el.on("keypress", function(evn) {
+			if(evn.keyCode == 13) {
+				evn.preventDefault();
+				el.trigger("blur");
+			}
+		});
+
+		proxyEl.on("click", function(evn) {
+			evn.preventDefault();
+
+			var value = el.val();
+
+			el.closest("h3").addClass("active");
+			el.css({
+				visibility: "visible",
+				width: ""
+			});
+
+			el.trigger("focus").val("").val(value);
+		});
+
+		el.trigger("blur");
+	},
+
+	focus: function() {
+		this.element.prev("span").trigger("click");
+	}
+});
+
+/**
+ * jQuery dialog default options.
+ */
+$.extend($.ui.dialog.prototype.options, {
+	autoOpen: false,
+	draggable: false,
+	height: "auto",
+	modal: true,
+	resizable: false,
+	width: 500
+});
+
+/**
+ * jQuery collapsible panel widget.
+ */
+$.widget("formsite.panel", {
+	options: { },
+
+	_create: function() {
+		this.options.control = this.options.control || this.element.find(":checkbox").first();
+		this.options.control.on("change", $.proxy(this.refresh, this));
+		this.options.content = this.options.content || this.element.children().not(this.options.control.closest(".setting")).wrapAll("<div></div>").parent();
+		this.options.content.addClass("toggler-content");
+		this.refresh();
+	},
+
+	refresh: function() {
+		if(this.options.control.is(":checked")) {
+			this.enable();
+		} else {
+			this.disable();
+		}
+	},
+
+	enable: function() {
+		this.options.content.show();
+	},
+
+	disable: function() {
+		this.options.content.hide();
+	}
+});
+
+/**
+ * jQuery file chooser widget.
+ */
+$.widget("formsite.fileChooser", {
+	options: { },
+
+	_create: function() {
+		var self = this;
+
+		this.options.accept = this.options.accept || "";
+		this.options.button = this.options.button || $('<button type="button" class="button-secondary">Upload file...</button>').appendTo(this.element);
+		this.options.fileDiv = this.options.fileDiv || $('<div style="height:330px;overflow:auto" />').appendTo(this.element);
+		this.options.input = this.options.input || $('<input type="file" accept="' + this.options.accept + '" style="display:none" />').appendTo(this.element)
+		this.options.removeBase = this.options.removeBase || false;
+		this.options.selected = this.options.selected || function() {};
+
+		$([this.options.button, this.options.fileDiv]).wrap('<div class="setting" />');
+
+		$('<progress max="100" style="width:100%"></progress>').height(this.options.button.height() - 4).hide().insertAfter(this.options.button);
+
+		this.options.button.on("click", function() {
+			self.options.input.click();
+		});
+
+		this.options.input.on("change", function() {
+			var formData = new FormData();
+
+			self.options.button.hide();
+			$(self.element).find("progress").attr("value", "10").show();
+			formData.append("FormId", "PostUserFile");
+			formData.append("File", self.options.input.prop("files")[0]);
+
+			$.ajax({
+				url: "FormSite",
+				type: "POST",
+				contentType: false,
+				processData: false,
+				data: formData,
+				dataType: "json",
+				xhr: function() {
+					var xhr = $.ajaxSettings.xhr();
+					xhr.upload.addEventListener("progress", function(evn) {
+						if (evn.lengthComputable) {
+							var n = parseInt(100.0 * evn.loaded / evn.total);
+							n = Math.min(n, 90);
+							$(self.element).find("progress").attr("value", n);
+						}
+					}, false);
+					return xhr;
+				},
+				success: function(data) {
+					if(data.error) {
+						alert(data.error);
+					} else {
+						self._doSelect(data.file);
+					}
+
+					self.options.button.show();
+					$(self.element).find("progress").hide();
+				}
+			});
+		});
+	},
+
+	load: function() {
+		var self = this;
+		var $holderEl = $(this.options.fileDiv);
+
+		$holderEl.html('<div style="text-align:center;padding-top:150px">loading...</div>');
+
+		$.getJSON(
+			"FormSite",
+			{ "FormId":"GetUserFiles", "Types":self.options.accept },
+			function(data) {
+				$holderEl.html("");
+
+				if(data.files) {
+					if(data.files.length > 0) {
+						$.each(data.files, function(i, obj) {
+							$holderEl.append(
+								$("<div />", { "class":"wrap-thumb", "data-url":obj.url}).append(
+									$("<div />", { "class":"thumb" }).css("backgroundImage", "url('" + (obj.icon ? obj.icon : obj.url) + "')")
+								).append(
+									"<span>" + obj.name  + "</span>"
+								)
+							);
+						});
+					} else {
+						$holderEl.html('<div style="text-align:center;padding-top:150px">No files to display.</div>');
+					}
+
+					$holderEl.find(".wrap-thumb").on("click", function() {
+						var url = $(this).data("url");
+
+						self._doSelect(url);
+					});
+				} else if(data.error) {
+					alert(data.error);
+				} else {
+					alert("unexpected error");
+				}
+			}
+		);
+	},
+
+	_doSelect: function(url) {
+		if(this.options.removeBase) {
+			url = url.replace(/[^:]+:\/\/[^\/]+\/[^\/]+\//, "");
+		}
+
+		this.options.selected(url);
+	}
+});
+
+$(function() {
+	Formsite.Util.Init.calendars();
+	Formsite.Util.Init.inlineFields();
+	Formsite.Util.Init.menus();
+	Formsite.Util.Init.messages();
+	Formsite.Util.Init.panels();
+	Formsite.Util.Init.textEditors(true);
+	Formsite.Util.Init.passwords();
+});
